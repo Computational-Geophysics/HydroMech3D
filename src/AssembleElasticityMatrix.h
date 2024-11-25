@@ -1,9 +1,7 @@
 //
 // Created by Federico Ciardo on 11.10.22. All rights reserved.
 //
-
-#include <il/il/linearAlgebra/dense/blas/dot.h>
-#include <il/Array2D.h>
+#include <armadillo>
 #include <src/Mesh.h>
 #include "FullSpaceElasticity.h"
 
@@ -12,9 +10,9 @@
 
 namespace EQSim {
 
-il::Array2D<double> AssembleElastMat(Mesh &mesh, EQSim::SolidMatrixProperties &matrix_prop);
+arma::mat AssembleElastMat(Mesh &mesh, EQSim::SolidMatrixProperties &matrix_prop);
 
-il::Array2D<double> RotationMatrix3D(il::Array<double> &normal_vector,
+arma::mat RotationMatrix3D(arma::vec &normal_vector,
                                      double &theta);
 
 }

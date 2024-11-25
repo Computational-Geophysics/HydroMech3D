@@ -9,7 +9,7 @@
 #include <iostream>
 
 // Inclusion from InsideLoop library
-#include <il/core.h>
+#include <armadillo>
 
 // Import from the project
 #include <JSON/nlohmann/json.hpp>
@@ -26,7 +26,7 @@ using json = nlohmann::json;
 
 namespace EQSim {
 
-void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
+void ImportFirstLayerJsonInput(json &js, bool &checkRestart, 
                                std::string &solver_description,
                                std::string &basefilename, std::string &date,
                                std::string &program_name, std::string &res_path,
@@ -34,14 +34,14 @@ void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
                                json &j_solver_params);
 
 void ImportSecondLayerJsonInput(json &j_model_params, bool &checkRestart,
-                                il::io_t, json &j_injection,
+                                json &j_injection,
                                 json &j_fluid_params, json &j_fault_properties,
                                 json &j_fault_insitu_params,
                                 json &j_initial_conditions,
                                 json &j_rock_properties, json &j_fluid_flow);
 
 void ImportThirdLayerJsonInput(bool &checkRestart, json &j_fault_properties,
-                               il::io_t, json &j_friction_properties,
+                               json &j_friction_properties,
                                json &j_permeability_properties);
 
 EQSim::FluidProperties LoadFluidProperties(json &j_fluid_params);

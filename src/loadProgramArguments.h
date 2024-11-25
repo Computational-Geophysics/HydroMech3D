@@ -6,8 +6,7 @@
 #include <fstream>
 
 // Inclusion from InsideLoop library
-#include <il/String.h>
-#include <il/core.h>
+#include <armadillo>
 
 // Inclusion from the project
 #include <nlohmann/json.hpp>
@@ -19,7 +18,7 @@
 using json = nlohmann::json;
 
 namespace EQSim {
-void LoadProgramArguments(int argc, const char *const *argv, il::io_t,
-                          il::String &argFileName, bool &checkRestart, json &js);
+void LoadProgramArguments(int argc, const char *const *argv,
+                          std::string &argFileName, bool &checkRestart, json &js);
 }
 #endif  // INC_3DEQSIM_SRC_LOADPROGRAMARGUMENTS_H

@@ -3,9 +3,7 @@
 //
 
 // Import from IL library
-#include <il/Array.h>
-#include <il/Array2D.h>
-
+#include <armadillo>
 #include <JSON/nlohmann/json.hpp>
 
 #include "FaultInSituStress.h"
@@ -33,14 +31,14 @@ class Solution {
   double current_time_;
   double time_step_;
   EQSim::SolverParameters solver_parameters_;
-  il::Array<double> insitu_tractions_;
-  il::Array<double> total_tractions_;
-  il::Array<double> DDs_;
-  il::Array<double> DDs_rates_;
-  il::Array<double> pressure_;
-  il::Array<double> pressure_o_;
+  arma::vec insitu_tractions_;
+  arma::vec total_tractions_;
+  arma::vec DDs_;
+  arma::vec DDs_rates_;
+  arma::vec pressure_;
+  arma::vec pressure_o_;
   EQSim::Injection injection_;
-  il::Array<double> hydraulic_aperture_;
+  arma::vec hydraulic_aperture_;
   EQSim::Mesh mesh_;
 
  public:
@@ -48,10 +46,10 @@ class Solution {
 
   Solution(double &current_time, double &time_step,
            EQSim::SolverParameters &solver_parameters,
-           il::Array<double> &insitu_tractions, il::Array<double> &DDs,
-           il::Array<double> &DDs_rates, il::Array<double> &pressure,
-           il::Array<double> &init_pressure,
-           il::Array<double> &hydraulic_aperture, EQSim::Mesh &mesh) {
+           arma::vec &insitu_tractions, arma::vec &DDs,
+           arma::vec &DDs_rates, arma::vec &pressure,
+           arma::vec &init_pressure,
+           arma::vec &hydraulic_aperture, EQSim::Mesh &mesh) {
     mesh_ = mesh;
     current_time_ = current_time;
     time_step_ = time_step;
@@ -74,114 +72,114 @@ class Solution {
   EQSim::SolverParameters getSolverParametersStructure() {
     return solver_parameters_;
   };
-  il::Array<double> getDDs() const { return DDs_; };
-  double getDDs(il::int_t &i) const { return DDs_[i]; };
-  il::Array<double> getSlip1() const {
-    il::Array<double> slip1{DDs_.size() / 3, 0.};
-    for (il::int_t I = 0; I < slip1.size(); ++I) {
+  arma::vec getDDs() const { return DDs_; };
+  double getDDs(arma::uword &i) const { return DDs_[i]; };
+  arma::vec getSlip1() const {
+    arma::vec slip1(DDs_.size() / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < slip1.n_elem; ++I) {
       slip1[I] = DDs_[3 * I];
     }
     return slip1;
   };
-  il::Array<double> getSlip2() const {
-    il::Array<double> slip2{DDs_.size() / 3, 0.};
-    for (il::int_t I = 0; I < slip2.size(); ++I) {
+  arma::vec getSlip2() const {
+    arma::vec slip2(DDs_.size() / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < slip2.n_elem; ++I) {
       slip2[I] = DDs_[3 * I + 1];
     }
     return slip2;
   };
-  il::Array<double> getOpening() const {
-    il::Array<double> opening{DDs_.size() / 3, 0.};
-    for (il::int_t I = 0; I < opening.size(); ++I) {
+  arma::vec getOpening() const {
+    arma::vec opening(DDs_.size() / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < opening.n_elem; ++I) {
       opening[I] = DDs_[3 * I + 2];
     }
     return opening;
   };
-  il::Array<double> getDDsRates() const { return DDs_rates_; };
-  double getDDsRates(il::int_t index) const { return DDs_rates_[index]; };
-  il::Array<double> getSlipRate1() const {
-    il::Array<double> slip_rate1{DDs_rates_.size() / 3, 0.};
-    for (il::int_t I = 0; I < slip_rate1.size(); ++I) {
+  arma::vec getDDsRates() const { return DDs_rates_; };
+  double getDDsRates(arma::uword index) const { return DDs_rates_[index]; };
+  arma::vec getSlipRate1() const {
+    arma::vec slip_rate1(DDs_rates_.size() / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < slip_rate1.n_elem; ++I) {
       slip_rate1[I] = DDs_rates_[3 * I];
     }
     return slip_rate1;
   };
-  il::Array<double> getSlipRate2() const {
-    il::Array<double> slip_rate2{DDs_rates_.size() / 3, 0.};
-    for (il::int_t I = 0; I < slip_rate2.size(); ++I) {
+  arma::vec getSlipRate2() const {
+    arma::vec slip_rate2(DDs_rates_.size() / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < slip_rate2.n_elem; ++I) {
       slip_rate2[I] = DDs_rates_[3 * I + 1];
     }
     return slip_rate2;
   };
-  il::Array<double> getPressure() const { return pressure_; };
-  double getPressure(il::int_t i) const { return pressure_[i]; };
-  il::Array<double> getInitPressure() const { return pressure_o_; };
-  double getInitPressure(il::int_t &i) const { return pressure_o_[i]; };
-  il::Array<double> getInsituTractions() const { return insitu_tractions_; };
-  double getInsituTractions(il::int_t &i) const {
+  arma::vec getPressure() const { return pressure_; };
+  double getPressure(arma::uword i) const { return pressure_[i]; };
+  arma::vec getInitPressure() const { return pressure_o_; };
+  double getInitPressure(arma::uword &i) const { return pressure_o_[i]; };
+  arma::vec getInsituTractions() const { return insitu_tractions_; };
+  double getInsituTractions(arma::uword &i) const {
     return insitu_tractions_[i];
   };
-  il::Array<double> getNormalInSituTractions() const {
-    il::Array<double> normal_tractions{insitu_tractions_.size() / 3, 0.};
-    for (int I = 0; I < normal_tractions.size(); ++I) {
+  arma::vec getNormalInSituTractions() const {
+    arma::vec normal_tractions(insitu_tractions_.n_elem / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < normal_tractions.n_elem; ++I) {
       normal_tractions[I] = insitu_tractions_[3 * I + 2];
     }
     return normal_tractions;
   };
-  double getNormalInSituTractions(il::int_t &i) const {
+  double getNormalInSituTractions(arma::uword &i) const {
     return insitu_tractions_[3 * i + 2];
   };
-  double getNormalTotalTractions(il::int_t &i) const {
+  double getNormalTotalTractions(arma::uword &i) const {
     return total_tractions_[3 * i + 2];
   };
   double getCurrentTime() const { return current_time_; };
   double getTimeStep() const { return time_step_; };
-  il::Array<double> getHydraulicAperture() const {
+  arma::vec getHydraulicAperture() const {
     return hydraulic_aperture_;
   };
-  double getHydraulicAperture(il::int_t &i) const {
+  double getHydraulicAperture(arma::uword &i) const {
     return hydraulic_aperture_[i];
   };
-  double getSlipRateAlongSlipDirection(il::int_t &elm_i,
-                                       il::int_t &slip_direction) {
+  double getSlipRateAlongSlipDirection(arma::uword &elm_i,
+                                       arma::uword &slip_direction) {
     return DDs_rates_[3 * elm_i + slip_direction];
   }
 
   // Setter methods
-  void setSlip1(double &slip1, il::int_t &i) { DDs_[3 * i] = slip1; }
-  void setSlip2(double &slip2, il::int_t &i) { DDs_[3 * i + 1] = slip2; }
-  void setOpening(double &opening, il::int_t &i) { DDs_[3 * i + 2] = opening; }
-  void setSlipRate1(double &slip_rate1, il::int_t &i) {
+  void setSlip1(double &slip1, arma::uword &i) { DDs_[3 * i] = slip1; }
+  void setSlip2(double &slip2, arma::uword &i) { DDs_[3 * i + 1] = slip2; }
+  void setOpening(double &opening, arma::uword &i) { DDs_[3 * i + 2] = opening; }
+  void setSlipRate1(double &slip_rate1, arma::uword &i) {
     DDs_rates_[3 * i] = slip_rate1;
   }
-  void setSlipRate2(double &slip_rate2, il::int_t &i) {
+  void setSlipRate2(double &slip_rate2, arma::uword &i) {
     DDs_rates_[3 * i + 1] = slip_rate2;
   }
-  void setSlipAlongSlipDirection(il::Array<double> &slip,
-                                 il::int_t &slip_direction) {
-    for (il::int_t I = 0; I < DDs_.size() / 3; ++I) {
+  void setSlipAlongSlipDirection(arma::vec &slip,
+                                 arma::uword &slip_direction) {
+    for (arma::uword I = 0; I < DDs_.n_elem / 3; ++I) {
       DDs_[3 * I + slip_direction] = slip[I];
     }
   }
-  void setSlipAlongSlipDirection(il::int_t &i, const double &slip,
-                                 il::int_t &slip_direction) {
+  void setSlipAlongSlipDirection(arma::uword &i, const double &slip,
+                                 arma::uword &slip_direction) {
     DDs_[3 * i + slip_direction] = slip;
   }
-  void setSlipRateAlongSlipDirection(il::Array<double> &slip_rate,
-                                     il::int_t &slip_direction) {
-    for (il::int_t I = 0; I < DDs_rates_.size() / 3; ++I) {
+  void setSlipRateAlongSlipDirection(arma::vec &slip_rate,
+                                     arma::uword &slip_direction) {
+    for (arma::uword I = 0; I < DDs_rates_.n_elem / 3; ++I) {
       DDs_rates_[3 * I + slip_direction] = slip_rate[I];
     }
   }
-  void setSlipRateAlongSlipDirection(il::int_t &i, const double &slip_rate,
-                                     il::int_t &slip_direction) {
+  void setSlipRateAlongSlipDirection(arma::uword &i, const double &slip_rate,
+                                     arma::uword &slip_direction) {
     DDs_rates_[3 * i + slip_direction] = slip_rate;
   }
-  void setTotalTractions(il::Array<double> &tot_tractions) {
+  void setTotalTractions(arma::vec &tot_tractions) {
     total_tractions_ = tot_tractions;
   }
 
-  void setTotalTractions(il::int_t &elm_i, double &shear_stress_1,
+  void setTotalTractions(arma::uword &elm_i, double &shear_stress_1,
                          double &shear_stress_2, double &normal_stress) {
     total_tractions_[3 * elm_i] = shear_stress_1;
     total_tractions_[3 * elm_i + 1] = shear_stress_2;
@@ -189,9 +187,10 @@ class Solution {
   }
   void setCurrentTime(const double &curr_time) { current_time_ = curr_time; }
   void setTimeStep(const double &time_step) { time_step_ = time_step; }
-  void setPressure(const il::Array<double> &pressure) { pressure_ = pressure; }
-  void setPressure(il::int_t &i, const double &value) { pressure_[i] = value; }
-  void setInitialPressure(const il::Array<double> &init_pressure) {
+  void setPressure(const arma::vec &pressure) { pressure_ = pressure; }
+  void setPressure(arma::uword &i, const double &value) { pressure_[i] = value;} 
+
+  void setInitialPressure(const arma::vec &init_pressure) {
     pressure_o_ = init_pressure;
   }
 };
@@ -199,9 +198,9 @@ class Solution {
 /// RK45 Solution -> subclass of Solution class
 class SolutionRK45 : public Solution {
  protected:
-  il::Array<double> state_variables_;
-  il::Array<double> plastic_fault_porosity_;
-  il::Array<double> fault_hydraulic_aperture_;
+  arma::vec state_variables_;
+  arma::vec plastic_fault_porosity_;
+  arma::vec fault_hydraulic_aperture_;
   EQSim::Injection injection_;
   EQSim::FluidProperties fluid_properties_;
   EQSim::FaultProperties fault_properties_;
@@ -209,8 +208,8 @@ class SolutionRK45 : public Solution {
   FrictionProperties *fric_properties_;
   PermeabilityProperties *permeab_properties_;
   std::string results_path_, baseFileName_;
-  il::Array2D<double> ElastMatrix_;
-  il::Array2D<il::int_t> neigh_elts_;
+  arma::mat ElastMatrix_;
+  arma::imat neigh_elts_;
 
  public:
   SolutionRK45() = default;
@@ -218,18 +217,18 @@ class SolutionRK45 : public Solution {
                EQSim::SolverParameters &solver_parameters,
                EQSim::FluidProperties &fluid_prop,
                EQSim::SolidMatrixProperties &solidMatrix_Properties,
-               il::Array<double> &insitu_tractions,
-               il::Array<double> &total_tractions, il::Array<double> &DDs,
-               il::Array<double> &DDs_rates, il::Array<double> &state_variables,
-               il::Array<double> &plastic_fault_porosity,
-               il::Array<double> &fault_hydraulic_aperture,
-               il::Array<double> &pressure_o, il::Array<double> &pressure,
+               arma::vec &insitu_tractions,
+               arma::vec &total_tractions, arma::vec &DDs,
+               arma::vec &DDs_rates, arma::vec &state_variables,
+               arma::vec &plastic_fault_porosity,
+               arma::vec &fault_hydraulic_aperture,
+               arma::vec &pressure_o, arma::vec &pressure,
                EQSim::Injection &InjectionObj,
                EQSim::FaultProperties &fault_properties, EQSim::Mesh &mesh,
                FrictionProperties *fric_prop,
                PermeabilityProperties *permeab_prop, std::string &res_path,
-               std::string &baseFileName, il::Array2D<double> const &elast_matrix,
-               il::Array2D<il::int_t> &neigh_elts) {
+               std::string &baseFileName, arma::mat const &elast_matrix,
+               arma::imat &neigh_elts) {
     mesh_ = mesh;
     current_time_ = current_time;
     time_step_ = time_step;
@@ -271,28 +270,29 @@ class SolutionRK45 : public Solution {
   PermeabilityProperties *getPermeabPtr() { return permeab_properties_; };
   std::string getResPath() { return results_path_; };
   std::string getBaseFileName() { return baseFileName_; };
-  il::Array2D<double> getElastMatrix() { return ElastMatrix_; };
-  il::Array<double> getStateVariables() { return state_variables_; };
-  il::Array<double> getPlasticFaultPorosity() {
+  arma::mat getElastMatrix() { return ElastMatrix_; };
+  arma::vec getStateVariables() { return state_variables_; };
+  arma::vec getPlasticFaultPorosity() {
     return plastic_fault_porosity_;
   };
-  il::Array<double> getFaultHydraulicAperture() {
+  arma::vec getFaultHydraulicAperture() {
     return fault_hydraulic_aperture_;
   };
-  double getInsituTractions(il::int_t i) const { return insitu_tractions_[i]; };
-  il::Array2D<il::int_t> getNeighElts() const { return neigh_elts_; };
+  double getInsituTractions(arma::uword i) const { return insitu_tractions_[i]; };
+  arma::imat getNeighElts() const { return neigh_elts_; };
 
   // Setter methods
-  void setStateVariables(il::Array<double> &state_variables) {
+  void setStateVariables(arma::vec &state_variables) {
     state_variables_ = state_variables;
   };
-  void setPlasticFaultPorosity(il::Array<double> &plastic_fault_porosity) {
+  void setPlasticFaultPorosity(arma::vec &plastic_fault_porosity) {
     plastic_fault_porosity_ = plastic_fault_porosity;
   };
-  void setFaultHydraulicAperture(il::Array<double> &fault_hydraulic_aperture) {
+  void setFaultHydraulicAperture(arma::vec &fault_hydraulic_aperture) {
     fault_hydraulic_aperture_ = fault_hydraulic_aperture;
   };
 };
 
 }  // namespace EQSim
+
 #endif  // INC_3DEQSIM_SRC_SOLUTION_H

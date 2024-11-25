@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-g",
+          "${file}",
+          "-o",
+          "${fileDirname}/${fileBasenameNoExtension}.exe",
+          "-I",
+          "/opt/homebrew/opt/armadillo/include",
+          "-L",
+          "/opt/homebrew/opt/armadillo/lib",
+          "-larmadillo"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": ["$gcc"],
+        "detail": "Generated task by Debugger."
+      }
+    ]
+  }

@@ -1,7 +1,7 @@
 {
 	"Date":"Tue 11 Oct 2022 16:28:46",
 	"Program name":"3DEQSim",
-	"Results path":"\/home\/zhenhuan001\/3DEQSim\/Test_results\/",
+	"Results path":"\/Users\/zhenhuan\/Documents\/code\/HydroMech3D_arma\/Test_results\/",
 	"Base name":"TEST-3DEQSim-P0-Nelts-10201",
 	"Description":"3D earthquake simulator",
 	"Mesh":{
@@ -276543,7 +276543,7 @@
 	},
 	"Solver parameters":{
 		"Initial time":0.0,
-		"Maximum time":10.0,
+		"Maximum time":5.0,
 		"Time step":1.0e-3,
 		"Time step amplification factor":1.1,
 		"Time step reduction factor":2.0,

@@ -14,7 +14,7 @@ struct SolverParameters {
   double tolerance_RK = 10e-6;  // default value
   double time_step_amplification_factor;
   double time_step_reduction_factor;
-  il::int_t export_current_solution_every_i_time_steps_;
+  int export_current_solution_every_i_time_steps_;
 };
 
 }  // namespace EQSim

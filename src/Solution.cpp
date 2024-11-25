@@ -21,13 +21,13 @@ namespace EQSim {
 
 json Solution::createJsonObjectToExport() {
   json json_coord = json::array();
-  for (il::int_t m = 0; m < mesh_.getCoordinates().size(0); ++m) {
+  for (arma::uword m = 0; m < mesh_.getCoordinates().n_rows; ++m) {
     json_coord[m] = {mesh_.getCoordinates(m, 0), mesh_.getCoordinates(m, 1),
                      mesh_.getCoordinates(m, 2)};
   }
   //  connectivity, and dofs array
   json json_connectivity = json::array();
-  for (il::int_t m = 0; m < mesh_.getNumberOfElts(); ++m) {
+  for (arma::uword m = 0; m < mesh_.getNumberOfElts(); ++m) {
     json_connectivity[m] = {
         mesh_.getNodesConnettivity(m, 0), mesh_.getNodesConnettivity(m, 1),
         mesh_.getNodesConnettivity(m, 2), mesh_.getNodesConnettivity(m, 3)};
@@ -39,13 +39,13 @@ json Solution::createJsonObjectToExport() {
 
   json json_mass_rates = json::array();
   auto mass_rates = injection_.getMassRatesSourceElem();
-  for (il::int_t I = 0; I < mass_rates.size(); ++I) {
+  for (arma::uword I = 0; I < mass_rates.n_elem; ++I) {
     json_mass_rates[I] = mass_rates[I];
   }
 
   json json_const_overpressure = json::array();
   auto const_overpress = injection_.getConstantOverpressuresSourceElem();
-  for (il::int_t I = 0; I < const_overpress.size(); ++I) {
+  for (arma::uword I = 0; I < const_overpress.n_elem; ++I) {
     json_const_overpressure[I] = const_overpress[I];
   }
 
@@ -60,7 +60,7 @@ json Solution::createJsonObjectToExport() {
   json json_pressure = json::array();
   json json_pressure_o = json::array();
 
-  for (il::int_t m = 0; m < mesh_.getNumberOfElts(); ++m) {
+  for (arma::uword m = 0; m < mesh_.getNumberOfElts(); ++m) {
     //    json_tau1[m] = tau1_[m];
     //    json_tau2[m] = tau2_[m];
     //    json_slip1[m] = slip1_[m];
@@ -120,12 +120,12 @@ void Solution::exportBaseSolutionToUBJson(json &j_obj_to_export,
 
 json SolutionRK45::createJsonObjectToExport(bool &export_background_stresses) {
   json json_source_elt1 = json::array();
-  il::int_t source_elt1 = injection_.getSourceElement1();
+  arma::uword source_elt1 = injection_.getSourceElement1();
   json_source_elt1 = source_elt1;
 
   json json_mass_rates = json::array();
   auto mass_rates = injection_.getMassRatesSourceElem();
-  for (il::int_t I = 0; I < mass_rates.size(); ++I) {
+  for (arma::uword I = 0; I < mass_rates.n_elem; ++I) {
     json_mass_rates[I] = mass_rates[I];
   }
 
@@ -142,9 +142,9 @@ json SolutionRK45::createJsonObjectToExport(bool &export_background_stresses) {
   json json_state_variable = json::array();
   json json_plastic_fault_porosity = json::array();
 
-  il::int_t Nelts = mesh_.getNumberOfElts();
+  arma::uword Nelts = mesh_.getNumberOfElts();
 
-  for (il::int_t m = 0; m < Nelts; ++m) {
+  for (arma::uword m = 0; m < Nelts; ++m) {
     json_tau1[m] = total_tractions_[3 * m];
     json_tau2[m] = total_tractions_[3 * m + 1];
     json_sigma_n[m] = total_tractions_[3 * m + 2];

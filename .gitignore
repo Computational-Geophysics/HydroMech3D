@@ -1,0 +1,8 @@
+*.log
+/Test_results
+/build
+/H2Lib
+/hlibpro-3.1
+*.nb
+/il
+*.o

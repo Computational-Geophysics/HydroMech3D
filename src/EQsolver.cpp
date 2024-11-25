@@ -37,7 +37,7 @@ long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
 //                     EARTHQUAKE SOLVER
 
 ///////////////////////////////////////////////////////////////////////////////
-void EQsolver(json &js, bool &checkRestart, il::io_t) {
+void EQsolver(json &js, bool &checkRestart) {
   ///////////// IMPORT INPUT DATA FROM JSON CONFIG FILE /////////////
 
   std::string solver_description, basefilename, date, program_name, res_path;
@@ -47,20 +47,21 @@ void EQsolver(json &js, bool &checkRestart, il::io_t) {
       j_friction_properties, j_permeability_properties;
 
   /// IMPORT: #1 layer keystrings
-  EQSim::ImportFirstLayerJsonInput(js, checkRestart, il::io, solver_description,
+  EQSim::ImportFirstLayerJsonInput(js, checkRestart, solver_description,
                                    basefilename, date, program_name, res_path,
                                    j_mesh, j_model_params, j_solver_params);
 
   /// IMPORT: #2 layer keystrings
   EQSim::ImportSecondLayerJsonInput(
-      j_model_params, checkRestart, il::io, j_injection, j_fluid_params,
+      j_model_params, checkRestart, j_injection, j_fluid_params,
       j_fault_properties, j_fault_insitu_params,
       j_initial_conditions, j_rock_properties, j_fluid_flow);
 
   /// IMPORT: #3 layer keystrings
   EQSim::ImportThirdLayerJsonInput(
-      checkRestart, j_fault_properties, il::io, j_friction_properties,
+      checkRestart, j_fault_properties, j_friction_properties,
       j_permeability_properties);
+  std::cout<<"All three layers are imported"<<std::endl;
 
   EQSim::FluidProperties FluidProperties = LoadFluidProperties(j_fluid_params);
 
@@ -71,50 +72,59 @@ void EQsolver(json &js, bool &checkRestart, il::io_t) {
   EQSim::FaultProperties FaultProperties = LoadFaultProperties(
       Mesh, j_fault_properties, j_friction_properties,
       j_permeability_properties, j_initial_conditions);
-
+  
   EQSim::FaultInSituStress FaultInSituStresses =
       LoadFaultInSituStressComponents(j_fault_insitu_params, Mesh);
 
-  il::Array<double> insitu_tractions =
+  arma::vec insitu_tractions =
       FaultInSituStresses.AllInSituTractions(Mesh);
+  std::cout<<"Insitu stress loaded"<<std::endl;
 
   EQSim::Injection Injection(j_injection);
+  std::cout<<"Injection loaded"<<std::endl;
 
   EQSim::FrictionProperties *fric_coeff_properties =
       FaultProperties.getFrictionProperties();
+  std::cout<<"Friction properties loaded"<<std::endl;
+
   EQSim::PermeabilityProperties *permeability_properties =
       FaultProperties.getPermeabilityProperties();
+  std::cout<<"Permeability properties loaded"<<std::endl;
 
   EQSim::SolverParameters solver_parameters =
       LoadSolverParameters(j_solver_params);
+  std::cout<<"Solver parameters loaded"<<std::endl;
 
-  il::Array2D<double> ElastMatrix = EQSim::AssembleElastMat(Mesh, SolidMatrixProperties);
+  arma::mat ElastMatrix = EQSim::AssembleElastMat(Mesh, SolidMatrixProperties);
+  std::cout<<"Elastic matrix assembled"<<std::endl;
 
-  il::Array2D<double> centroids = Mesh.getCentroids();
-  il::Array2D<il::int_t> neigh_elts =
+  arma::mat centroids = Mesh.getCentroids();
+  arma::imat neigh_elts =
       Mesh.getNeighbourElements_UniformMesh(Mesh);
+  
+  std::cout<<"Initializing started"<<std::endl;
 
   // Initialization
   double current_time = solver_parameters.initial_time;
   double time_Step = solver_parameters.time_Step;
 
-  il::Array<double> initial_DDs = FaultProperties.getInitialDDs();
-  il::Array<double> initial_DDs_rates = FaultProperties.getInitialDDsRates();
-  il::Array<double> initial_state_variables =
+  arma::vec initial_DDs = FaultProperties.getInitialDDs();
+  arma::vec initial_DDs_rates = FaultProperties.getInitialDDsRates();
+  arma::vec initial_state_variables =
       FaultProperties.getInitialStateVariables();
-  il::Array<double> initial_plastic_fault_porosity{Mesh.getNumberOfElts(), 0.};
-  for (il::int_t I = 0; I < initial_plastic_fault_porosity.size(); ++I) {
+  arma::vec initial_plastic_fault_porosity(Mesh.getNumberOfElts(), arma::fill::zeros);
+  for (arma::uword I = 0; I < initial_plastic_fault_porosity.n_elem; ++I) {
     initial_plastic_fault_porosity[I] =
         FaultProperties.getInitialPlasticFaultPorosity(0);
   }
-  il::Array<double> initial_fault_hydraulic_aperture{Mesh.getNumberOfElts(),
-                                                     0.};
+  arma::vec initial_fault_hydraulic_aperture(Mesh.getNumberOfElts(),
+                                                     arma::fill::zeros);
 
-  for (il::int_t I = 0; I < initial_fault_hydraulic_aperture.size(); ++I) {
+  for (arma::uword I = 0; I < initial_fault_hydraulic_aperture.n_elem; ++I) {
     initial_fault_hydraulic_aperture[I] =
         FaultProperties.getInitialFaultHydraulicAperture(0);
   }
-  il::Array<double> ambient_pressure =
+  arma::vec ambient_pressure =
       FaultProperties.getAmbientPressureDistribution();
 
   EQSim::SolutionRK45 SolutionObj(
@@ -128,9 +138,12 @@ void EQsolver(json &js, bool &checkRestart, il::io_t) {
 
   EQSim::RightHandSideODEs RightHandSides(pressure_rhs, state_rhs,
                                           slip_rate_rhs);
+  std::cout<<"RightHandSideODEs prepared"<<std::endl;
 
   EQSim::RK45 rk45(&RightHandSides, SolutionObj);
+  std::cout<<"Initialization complete start to solve"<<std::endl;
   rk45.Solve();
+  std::cout<<"RK45 solved"<<std::endl;
 }
 
 double pressure_rhs(double &permeab, double &fluid_compress,
@@ -144,7 +157,7 @@ double pressure_rhs(double &permeab, double &fluid_compress,
 }
 
 double state_rhs(double &theta, double &dc, double &slip_rate) {
-  double omega = (il::abs(slip_rate) * theta) / dc;
+  double omega = (std::abs(slip_rate) * theta) / dc;
 
   return -1. * omega * log(omega);
 }
@@ -159,21 +172,21 @@ long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
                           double &Q) {
 
   double beta = porosity * (fluid_compress + void_compress);
-  double omega = (il::abs(slip_rate) * theta) / dc;
+  double omega = (std::abs(slip_rate) * theta) / dc;
   double thetadot = -1. * omega * log(omega);
   double pdot = ((permeab / (viscosity * beta)) * d2_p) +
                 (Q / (hydraulic_aperture * beta));
 
   long double fric_coeff =
-      ref_fric_coeff + (a_value * log(il::abs(slip_rate) / ref_slip_velocity)) +
+      ref_fric_coeff + (a_value * log(std::abs(slip_rate) / ref_slip_velocity)) +
       (b_value * log((theta * ref_slip_velocity) / dc));
 
   long double Numerator =
-      il::abs(slip_rate) * ((theta * (fric_coeff * pdot - GtimesSlipRate)) +
+      std::abs(slip_rate) * ((theta * (fric_coeff * pdot - GtimesSlipRate)) +
                             (b_value * (p - sigma_n) * thetadot));
 
   long double Denominator = ((a_value * sigma_n) - (a_value * p)) * theta;
-
+  
   return Numerator / Denominator;
 }
 

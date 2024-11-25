@@ -17,7 +17,8 @@ MESSAGE("ID C++ compiler = ${CMAKE_CXX_COMPILER_ID}")
 MESSAGE("Build type = ${CMAKE_BUILD_TYPE}")
 
 #####
-find_package(OpenBLAS REQUIRED)
+find_package(Armadillo REQUIRED)
+include_directories(${ARMADILLO_INCLUDE_DIR})
 ####
 
 ################################################################################
@@ -38,30 +39,27 @@ ENDIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -DIL_MKL -DIL_BLAS")
             set(CMAKE_MKL_LIBRARIES mkl_intel_lp64 mkl_core mkl_intel_thread iomp5 dl pthread m)
-            link_directories($ENV{MKLROOT}/lib $ENV{MKLROOT}/../../compiler/latest/mac/compiler/lib)
+	    link_directories($ENV{MKLROOT}/lib $ENV{MKLROOT}/../../compiler/latest/mac/compiler/lib)
 endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 	   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -DIL_MKL -DIL_BLAS")
            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed")
            set(CMAKE_MKL_LIBRARIES mkl_intel_lp64 mkl_core mkl_intel_thread iomp5 dl pthread m)
-           link_directories($ENV{MKLROOT}/lib/intel64_lin)
-	   
-	   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DIL_OPENBLAS -DIL_BLAS")
-           set(CMAKE_OPENBLAS_LIBRARIES "/usr/local/openblas-0.3.7-gcc6/lib/libopenblas.so")
+           link_directories($ENV{MKLROOT}/lib/intel64_lin)	   
 endif()
-
 ################################################################################
 #  FOR 3DEQSim
 ################################################################################
-
 # Include InsideLoop library
 include_directories(il)
+#include_directories(hlibpro-3.1/include)
 
 # Include JSON library
 include_directories(JSON)
 # Include Openblas library
 include_directories(${OpenBLAS_INCLUDE_DIR})
+#add_library(hpro STATIC IMPORTED)
+#set_target_properties(hpro PROPERTIES IMPORTED_LOCATION /home/zhenhuan001/HydroMech3D/hlibpro-3.1/lib/libhpro.so)
 # Set directory containing all the source files
 set(SOURCE_FILES_DIR ${PROJECT_SOURCE_DIR}/src)
 
@@ -108,7 +106,8 @@ add_executable(3DEQSim ${SOURCE_FILES} main.cpp)
 # Link the MKL library to the executable 3DEQSim
 # ${CMAKE_MKL_LIBRARIES} should specify the path in which the linker should
 # search for libraries when linking 3DEQSim
-target_link_libraries(3DEQSim ${CMAKE_MKL_LIBRARIES})
-target_link_libraries(3DEQSim ${OpenBLAS_LIBRARIES})
+#link_directories(hlibpro-3.1/lib)
+#target_link_libraries(3DEQSim hpro ${Boost_LIBRARIES} ${TBB_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(3DEQSim ${CMAKE_MKL_LIBRARIES} ${ARMADILLO_LIBRARIES})
 # Include directory to be compiled
 target_include_directories(3DEQSim PRIVATE ${CMAKE_SOURCE_DIR} $ENV{MKLROOT}/include)

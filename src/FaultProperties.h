@@ -1,8 +1,7 @@
 //
 // Created by Federico Ciardo on 30.09.21. All rights reserved.
 //
-
-#include "il/Array.h"
+#include <armadillo>
 
 #ifndef INC_3DEQSIM_SRC_FAULTPROPERTIES_H
 #define INC_3DEQSIM_SRC_FAULTPROPERTIES_H
@@ -23,27 +22,27 @@ class FaultProperties {
  private:
   double porosity_;
   double void_compressibility_;
-  il::Array<double> initial_hydraulic_aperture_;
+  arma::vec initial_hydraulic_aperture_;
   EQSim::PermeabilityProperties *permeabilityProperties_;
   EQSim::FrictionProperties *friction_properties_;
-  il::Array<double> initial_DDs_;
-  il::Array<double> initial_DDs_rates_;
-  il::Array<double> initial_state_variables_;
-  il::Array<double> initial_plastic_porosity_;
-  il::Array<double> internal_loads_;
+  arma::vec initial_DDs_;
+  arma::vec initial_DDs_rates_;
+  arma::vec initial_state_variables_;
+  arma::vec initial_plastic_porosity_;
+  arma::vec internal_loads_;
 
   // Constructors
  public:
   FaultProperties() = default;
   FaultProperties(double &porosity, double &void_compressibility,
-                  il::Array<double> &initial_hydraulic_aperture,
+                  arma::vec &initial_hydraulic_aperture,
                   EQSim::FrictionProperties *friction_properties,
                   EQSim::PermeabilityProperties *permeabilityProperties,
-                  il::Array<double> &initial_DDs,
-                  il::Array<double> &initial_DDs_rates,
-                  il::Array<double> &initial_state_variables,
-                  il::Array<double> &initial_plastic_porosity,
-                  il::Array<double> &internal_loads) {
+                  arma::vec &initial_DDs,
+                  arma::vec &initial_DDs_rates,
+                  arma::vec &initial_state_variables,
+                  arma::vec &initial_plastic_porosity,
+                  arma::vec &internal_loads) {
     porosity_ = porosity;
     void_compressibility_ = void_compressibility;
     initial_hydraulic_aperture_ = initial_hydraulic_aperture;
@@ -58,26 +57,26 @@ class FaultProperties {
 
   // Getter methods
   double getFaultPorosity() const { return porosity_; };
-  double getInitialPlasticFaultPorosity(il::int_t index) const {
+  double getInitialPlasticFaultPorosity(int index) const {
     return initial_plastic_porosity_[index];
   };
   double getFaultVoidCompressibility() const { return void_compressibility_; };
-  double getInitialFaultHydraulicAperture(il::int_t i) const {
+  double getInitialFaultHydraulicAperture(int i) const {
     return initial_hydraulic_aperture_[i];
   };
   PermeabilityProperties *getPermeabilityProperties() {
     return permeabilityProperties_;
   };
   FrictionProperties *getFrictionProperties() { return friction_properties_; };
-  il::Array<double> getInitialDDs() { return initial_DDs_; };
-  il::Array<double> getInitialDDsRates() { return initial_DDs_rates_; };
-  il::Array<double> getInitialStateVariables() {
+  arma::vec getInitialDDs() { return initial_DDs_; };
+  arma::vec getInitialDDsRates() { return initial_DDs_rates_; };
+  arma::vec getInitialStateVariables() {
     return initial_state_variables_;
   };
-  il::Array<double> getInternalLoads() { return internal_loads_; };
-  il::Array<double> getAmbientPressureDistribution() {
-    il::Array<double> ambient_pressure{internal_loads_.size() / 3, 0.};
-    for (il::int_t I = 0; I < internal_loads_.size() / 3; ++I) {
+  arma::vec getInternalLoads() { return internal_loads_; };
+  arma::vec getAmbientPressureDistribution() {
+    arma::vec ambient_pressure(internal_loads_.n_elem / 3, arma::fill::zeros);
+    for (arma::uword I = 0; I < internal_loads_.n_elem / 3; ++I) {
       ambient_pressure[I] = internal_loads_[3 * I + 2];
     }
     return ambient_pressure;

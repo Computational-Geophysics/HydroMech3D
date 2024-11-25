@@ -6,9 +6,9 @@
 
 namespace EQSim {
 
-inline il::Array2D<double> RotationMatrix3D(il::Array<double> &normal_vector,
+inline arma::mat RotationMatrix3D(arma::vec &normal_vector,
                                             double &theta) {
-  il::Array2D<double> R{3, 3, 0.};
+  arma::mat R(3, 3, arma::fill::zeros);
 
   double n1, n2, n3, n1square, n2square, n3square;
   n1 = normal_vector[0];
@@ -47,14 +47,14 @@ inline double euclideanDistance(double x1, double x2, double x3, double y1,
 
 /////////
 template <typename T>
-inline il::Array2D<T> position_2d_array(const il::Array2D<T> &arr2D, T seek) {
-  il::int_t arr2D_size1 = arr2D.size(1);
-  il::int_t arr2D_size0 = arr2D.size(0);
-  il::Array2D<T> M{arr2D_size1 * arr2D_size0, 2, -1};
-  il::int_t k = 0;
+inline arma::Mat<T> position_2d_array(const arma::Mat<T> &arr2D, T seek) {
+  arma::uword arr2D_size1 = arr2D.n_cols;
+  arma::uword arr2D_size0 = arr2D.n_rows;
+  arma::Mat<T> M(arr2D_size1 * arr2D_size0, 2, arma::fill::value(-1));
+  arma::uword k = 0;
 
-  for (il::int_t i = 0; i < arr2D_size0; ++i) {
-    for (il::int_t j = 0; j < arr2D_size1; ++j) {
+  for (arma::uword i = 0; i < arr2D_size0; ++i) {
+    for (arma::uword j = 0; j < arr2D_size1; ++j) {
       if (arr2D(i, j) == seek) {
         M(k, 0) = i;
         M(k, 1) = j;
@@ -63,10 +63,10 @@ inline il::Array2D<T> position_2d_array(const il::Array2D<T> &arr2D, T seek) {
     }
   }
 
-  il::Array2D<T> outp{k, 2, 0};
+  arma::imat outp(k, 2, arma::fill::zeros);
 
-  for (il::int_t l = 0; l < k; ++l) {
-    for (il::int_t k2 = 0; k2 < 2; ++k2) {
+  for (arma::uword l = 0; l < k; ++l) {
+    for (arma::uword k2 = 0; k2 < 2; ++k2) {
       outp(l, k2) = M(l, k2);
     }
   }
@@ -76,18 +76,19 @@ inline il::Array2D<T> position_2d_array(const il::Array2D<T> &arr2D, T seek) {
 
 /////////
 template <class T>
-inline il::Array<T> deleteDuplicates(const il::Array<T> &arr) {
-  il::Array<T> res{};
+inline arma::Col<T> deleteDuplicates(const arma::Col<T> &arr) {
+  arma::Col<T> res;
 
-  for (il::int_t i = 0; i < arr.size(); ++i) {
+  for (arma::uword i = 0; i < arr.n_elem; ++i) {
     bool already_there = false;
-    for (il::int_t j = 0; j < res.size(); ++j) {
+    for (arma::uword j = 0; j < res.n_elem; ++j) {
       if (arr[i] == res[j]) {
         already_there = true;
       }
     }
     if (!already_there) {
-      res.Append(arr[i]);
+    	res.insert_rows(res.n_elem, 1);
+	res(res.n_elem - 1) = arr[i];
     }
   }
 
@@ -95,25 +96,25 @@ inline il::Array<T> deleteDuplicates(const il::Array<T> &arr) {
 }
 
 ////////
-inline il::Array<double> CalculatePressureLaplacianUniformMeshOnly(
-    il::Array2D<il::int_t> &neigh_elts, EQSim::Mesh &Mesh,
-    const il::Array<double> &my_vector) {
-  il::Array<double> res{my_vector.size(), 0.};
-  il::Array<double> resX{my_vector.size(), 0.};
-  il::Array<double> resY{my_vector.size(), 0.};
-  il::Array<il::int_t> neighElts{};
-  il::int_t t;
+inline arma::vec CalculatePressureLaplacianUniformMeshOnly(
+    arma::imat &neigh_elts, EQSim::Mesh &Mesh,
+    const arma::vec &my_vector) {
+  arma::vec res(my_vector.n_elem, arma::fill::zeros);
+  arma::vec resX(my_vector.n_elem, arma::fill::zeros);
+  arma::vec resY(my_vector.n_elem, arma::fill::zeros);
+  arma::ivec neighElts;
+  arma::uword t;
   EQSim::ElementData elemI;
-  il::int_t N_eltsX, N_eltsY;
+  arma::uword N_eltsX, N_eltsY;
 
-  for (il::int_t I = 0; I < neigh_elts.size(0); ++I) {
+  for (arma::uword I = 0; I < neigh_elts.n_rows; ++I) {
     elemI = Mesh.getElementData(I);
 
     // Find the real neighbour elements, i.e. the ones different than -1.
     t = 0;
-    for (il::int_t J = 0; J < neigh_elts.size(1); ++J) {
+    for (arma::uword J = 0; J < neigh_elts.n_cols; ++J) {
       if (neigh_elts(I, J) != -1) {
-        neighElts.Resize(t + 1);
+        neighElts.resize(t + 1);
         neighElts[t] = neigh_elts(I, J);
         ++t;
       }
@@ -122,15 +123,15 @@ inline il::Array<double> CalculatePressureLaplacianUniformMeshOnly(
     N_eltsX = 0;
     N_eltsY = 0;
     // Loop over the real neighbour elements
-    for (il::int_t J = 0; J < neighElts.size(); ++J) {
+    for (arma::uword J = 0; J < neighElts.n_elem; ++J) {
       if ((Mesh.getCentroids(neighElts[J], 1) == Mesh.getCentroids(I, 1)) &&
-          (neighElts[J] != I)) {
+          (neighElts[J] != static_cast<long long int>(I))) {
         resX[I] += my_vector[neighElts[J]];
         ++N_eltsX;
       }
 
       if ((Mesh.getCentroids(neighElts[J], 0) == Mesh.getCentroids(I, 0)) &&
-          (neighElts[J] != I)) {
+          (neighElts[J] != static_cast<long long int>(I))) {
         resY[I] += my_vector[neighElts[J]];
         ++N_eltsY;
       }

@@ -3,7 +3,7 @@
 //
 
 // Import from IL library
-#include <il/Array.h>
+#include <armadillo>
 
 // Import from the project
 #include "Solution.h"

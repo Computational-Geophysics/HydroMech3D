@@ -3,10 +3,7 @@
 //
 
 // Inclusion from IL library
-#include <il/Array.h>
-#include <il/Array2D.h>
-#include <il/linearAlgebra.h>
-
+#include <armadillo>
 // Inclusion from the project
 #include "SolidMatrixProperties.h"
 #include "src/StressKernelsP0/StressKernelsDxP0.h"
@@ -16,10 +13,10 @@
 
 namespace EQSim {
 
-il::Array2D<double> TractionsDueToDDsOnSingleEltP0(
-    double &a, double &b, il::Array<double> &coor_centroid_elt,
-    il::Array<double> &shear1_vector, il::Array<double> &shear2_vector,
-    il::Array<double> &normal_vector, SolidMatrixProperties Matrix_Prop, il::io_t);
+arma::mat TractionsDueToDDsOnSingleEltP0(
+    double &a, double &b, arma::vec &coor_centroid_elt,
+    arma::vec &shear1_vector, arma::vec &shear2_vector,
+    arma::vec &normal_vector, SolidMatrixProperties Matrix_Prop);
 
 }  // namespace EQSim
 

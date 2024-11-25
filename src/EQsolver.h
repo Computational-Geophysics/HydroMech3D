@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 // Inclusion from InsideLoop library
-#include <il/core.h>
+#include <armadillo>
 
 #ifndef INC_3DEQSIM_SRC_EQSOLVER_H
 #define INC_3DEQSIM_SRC_EQSOLVER_H
@@ -15,7 +15,7 @@
 using json = nlohmann::json;
 
 namespace EQSim {
-void EQsolver(json &js, bool &checkRestart, il::io_t);
+void EQsolver(json &js, bool &checkRestart);
 }
 
 #endif  // INC_3DEQSIM_SRC_EQSOLVER_H

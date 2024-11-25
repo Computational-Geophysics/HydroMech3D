@@ -4,7 +4,7 @@
 
 // Inclusion from Standard library
 #include <iostream>
-
+#include <cassert>
 // Import from the project
 #include <JSON/nlohmann/json.hpp>
 
@@ -25,7 +25,7 @@ namespace EQSim {
 
 class PermeabilityProperties {
  protected:
-  il::Array<double> permeabilities_;
+  arma::vec permeabilities_;
 
  public:
   // Constructor
@@ -36,8 +36,8 @@ class PermeabilityProperties {
                                          EQSim::Mesh &Mesh) = 0;
 
   // Getter functions
-  il::Array<double> getPermeabilities() const { return permeabilities_; };
-  double getPermeabilities(il::int_t i) const { return permeabilities_[i]; };
+  arma::vec getPermeabilities() const { return permeabilities_; };
+  double getPermeabilities(arma::uword i) const { return permeabilities_[i]; };
 };
 
 // This sub-class inherits from PermeabilityProperties class and encapsulates
@@ -52,23 +52,23 @@ class ConstantPermeability : public PermeabilityProperties {
     // Initial check of keywords
     if (j_perm_param.count("Permeability") != 1) {
       std::cout << "Permeability keyword is wrong in input file! " << std::endl;
-      il::abort();
+      std::abort();
     }
 
-    il::Array<double> perm{1, 0.};
-    IL_ASSERT(perm.size() == j_perm_param["Permeability"].size());
+    arma::vec perm(1, arma::fill::zeros);
+    assert(perm.size() == j_perm_param["Permeability"].size());
 
-    for (il::int_t i = 0; i < 1; ++i) {
+    for (arma::uword i = 0; i < 1; ++i) {
       perm[i] = j_perm_param["Permeability"][i];
     }
 
     // Assign all the material parameters to each element in the mesh
 
-    il::int_t Nelts = Mesh.getNumberOfElts();
-    il::Array<double> permeabilities{Nelts, 0.};
-    il::int_t matID_idx;
+    arma::uword Nelts = Mesh.getNumberOfElts();
+    arma::vec permeabilities(Nelts, arma::fill::zeros);
+    arma::uword matID_idx;
 
-    for (il::int_t I = 0; I < Nelts; ++I) {
+    for (arma::uword I = 0; I < Nelts; ++I) {
       permeabilities[I] = perm[0];
     }
 

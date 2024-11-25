@@ -4,6 +4,7 @@
 
 // Inclusion from Standard library
 #include <iostream>
+#include <cassert>
 
 // Import from the project
 #include "Mesh.h"
@@ -21,15 +22,15 @@ namespace EQSim {
 
 class FrictionProperties {
  protected:
-  il::Array<double> friction_coefficients_;
-  il::Array<double> a_values_;
-  il::Array<double> b_values_;
-  il::Array<double> reference_velocities_;
-  il::Array<double> state_evolution_distances_;
-  il::Array<double> reference_friction_coefficients_;
-  il::Array<double> peak_friction_coefficients_;
-  il::Array<double> residual_friction_coefficients_;
-  il::Array<double> residual_slips_;
+  arma::vec friction_coefficients_;
+  arma::vec a_values_;
+  arma::vec b_values_;
+  arma::vec reference_velocities_;
+  arma::vec state_evolution_distances_;
+  arma::vec reference_friction_coefficients_;
+  arma::vec peak_friction_coefficients_;
+  arma::vec residual_friction_coefficients_;
+  arma::vec residual_slips_;
 
  public:
   // Constructor
@@ -40,30 +41,30 @@ class FrictionProperties {
                                      EQSim::Mesh &Mesh) = 0;
 
   // Getter methods
-  il::Array<double> getFrictionCoefficient() { return friction_coefficients_; }
-  double getFrictionCoefficient(il::int_t i) {
+  arma::vec getFrictionCoefficient() { return friction_coefficients_; }
+  double getFrictionCoefficient(arma::uword i) {
     return friction_coefficients_[i];
   }
-  il::Array<double> get_a_values() const { return a_values_; };
-  double get_a_values(il::int_t &i) const { return a_values_[i]; };
-  il::Array<double> get_b_values() const { return b_values_; };
-  double get_b_values(il::int_t &i) const { return b_values_[i]; };
-  il::Array<double> get_reference_velocities() {
+  arma::vec get_a_values() const { return a_values_; };
+  double get_a_values(arma::uword &i) const { return a_values_[i]; };
+  arma::vec get_b_values() const { return b_values_; };
+  double get_b_values(arma::uword &i) const { return b_values_[i]; };
+  arma::vec get_reference_velocities() {
     return reference_velocities_;
   };
-  double get_reference_velocities(il::int_t &i) {
+  double get_reference_velocities(arma::uword &i) {
     return reference_velocities_[i];
   };
-  il::Array<double> get_state_evolution_distances_() const {
+  arma::vec get_state_evolution_distances_() const {
     return state_evolution_distances_;
   };
-  double get_state_evolution_distances_(il::int_t &i) const {
+  double get_state_evolution_distances_(arma::uword &i) const {
     return state_evolution_distances_[i];
   };
-  il::Array<double> get_reference_friction_coefficients_() const {
+  arma::vec get_reference_friction_coefficients_() const {
     return reference_friction_coefficients_;
   };
-  double get_reference_friction_coefficients_(il::int_t i) const {
+  double get_reference_friction_coefficients_(arma::uword i) const {
     return reference_friction_coefficients_[i];
   };
 };
@@ -77,11 +78,11 @@ class FrictionProperties {
 
 class RateAndStateFriction : public FrictionProperties {
  private:
-  il::Array<double> a_;
-  il::Array<double> b_;
-  il::Array<double> Vo_;
-  il::Array<double> Dc_;
-  il::Array<double> fo_;
+  arma::vec a_;
+  arma::vec b_;
+  arma::vec Vo_;
+  arma::vec Dc_;
+  arma::vec fo_;
 
  public:
   void setFrictionParameters(json &j_friction_param,
@@ -91,46 +92,46 @@ class RateAndStateFriction : public FrictionProperties {
       std::cout
           << "Reference friction coefficient keyword is wrong in input file! "
           << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (j_friction_param.count("a-values") != 1) {
       std::cout << "a-values keyword is wrong in input file! " << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (j_friction_param.count("b-values") != 1) {
       std::cout << "b-values keyword is wrong in input file! " << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (j_friction_param.count("State evolution distances") != 1) {
       std::cout << "State evolution distances keyword is wrong in input file! "
                 << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (j_friction_param.count("Reference velocities") != 1) {
       std::cout << "Reference velocities keyword is wrong in input file! "
                 << std::endl;
-      il::abort();
+      std::abort();
     }
 
-    il::Array<double> a{1, 0.};
-    il::Array<double> b{1, 0.};
-    il::Array<double> Dc{1, 0.};
-    il::Array<double> Vo{1, 0.};
-    il::Array<double> fo{1, 0.};
+    arma::vec a(1, arma::fill::zeros);
+    arma::vec b(1, arma::fill::zeros);
+    arma::vec Dc(1, arma::fill::zeros);
+    arma::vec Vo(1, arma::fill::zeros);
+    arma::vec fo(1, arma::fill::zeros);
 
-    IL_ASSERT(fo.size() ==
-              j_friction_param["Reference friction coefficient"].size());
-    IL_ASSERT(a.size() == j_friction_param["a-values"].size());
-    IL_ASSERT(b.size() == j_friction_param["b-values"].size());
-    IL_ASSERT(Dc.size() ==
-              j_friction_param["State evolution distances"].size());
-    IL_ASSERT(Vo.size() == j_friction_param["Reference velocities"].size());
+    assert(fo.size() ==
+           j_friction_param["Reference friction coefficient"].size());
+    assert(a.size() == j_friction_param["a-values"].size());
+    assert(b.size() == j_friction_param["b-values"].size());
+    assert(Dc.size() ==
+           j_friction_param["State evolution distances"].size());
+    assert(Vo.size() == j_friction_param["Reference velocities"].size());
 
-    for (il::int_t i = 0; i < 1; ++i) {
+    for (arma::uword i = 0; i < 1; ++i) {
       fo[i] = j_friction_param["Reference friction coefficient"][i];
       a[i] = j_friction_param["a-values"][i];
       b[i] = j_friction_param["b-values"][i];
@@ -146,14 +147,14 @@ class RateAndStateFriction : public FrictionProperties {
 
     // Assign all the material parameters to each element in the mesh
 
-    il::int_t Nelts = Mesh.getNumberOfElts();
-    il::Array<double> foValues{Nelts, 0.};
-    il::Array<double> aValues{Nelts, 0.};
-    il::Array<double> bValues{Nelts, 0.};
-    il::Array<double> reference_velocities{Nelts, 0.};
-    il::Array<double> state_evolution_distances{Nelts, 0.};
+    arma::uword Nelts = Mesh.getNumberOfElts();
+    arma::vec foValues(Nelts, arma::fill::zeros);
+    arma::vec aValues(Nelts, arma::fill::zeros);
+    arma::vec bValues(Nelts, arma::fill::zeros);
+    arma::vec reference_velocities(Nelts, arma::fill::zeros);
+    arma::vec state_evolution_distances(Nelts, arma::fill::zeros);
 
-    for (il::int_t I = 0; I < Nelts; ++I) {
+    for (arma::uword I = 0; I < Nelts; ++I) {
       foValues[I] = fo_[0];
       aValues[I] = a_[0];
       bValues[I] = b_[0];

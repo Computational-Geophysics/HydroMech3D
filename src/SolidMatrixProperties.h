@@ -39,7 +39,7 @@ class SolidMatrixProperties {
   double getPoissonRatio() const { return poiss_; }
   double getRockDensity() const { return density_; }
   double getBulkModulus() const { return young_ / (3. * (1. - 2. * poiss_)); }
-};
+  };
 }  // namespace EQSim
 
 #endif  // INC_3DEQSIM_SRC_SOLIDMATRIXPROPERTIES_H

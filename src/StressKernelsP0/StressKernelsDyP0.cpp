@@ -6,14 +6,14 @@
 
 namespace EQSim {
 
-il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
+arma::mat StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
                                                       double &x1, double &x2,
                                                       double &x3, double &Nu,
                                                       double &G) {
   double Sigma_xx_Dy, Sigma_yy_Dy, Sigma_zz_Dy, Sigma_xy_Dy, Sigma_xz_Dy,
       Sigma_yz_Dy;
 
-  il::Array2D<double> StressTensorDueToDy{3, 3, 0.};
+  arma::mat StressTensorDueToDy(3, 3, arma::fill::zeros);
 
   Sigma_xx_Dy =
       (G *
@@ -43,7 +43,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
              x3 / (sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2)) *
                    (a + x1 +
                     sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2))))))) /
-      (4. * (1 - Nu) * il::pi);
+      (4. * (1 - Nu) * arma::datum::pi);
 
   Sigma_yy_Dy =
       (G *
@@ -107,7 +107,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
                    pow(a + x1 +
                            sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2)),
                        2))))) /
-      (4. * (1 - Nu) * il::pi);
+      (4. * (1 - Nu) * arma::datum::pi);
 
   Sigma_zz_Dy =
       -0.25 *
@@ -144,7 +144,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
             (pow(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2), 1.5) *
              pow(a + x1 + sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2)),
                  2)))) /
-      ((1 - Nu) * il::pi);
+      ((1 - Nu) * arma::datum::pi);
 
   Sigma_xy_Dy =
       (G *
@@ -174,7 +174,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
              x3 / (sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2)) *
                    (b + x2 +
                     sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2))))))) /
-      (4. * (1 - Nu) * il::pi);
+      (4. * (1 - Nu) * arma::datum::pi);
 
   Sigma_xz_Dy =
       (G * (-(x3 * (-(x3 / pow(pow(a, 2) + pow(b, 2) - 2 * a * x1 + pow(x1, 2) -
@@ -197,7 +197,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
                            2 * b * x2 + pow(x2, 2) + pow(x3, 2)) +
                   1 / sqrt(pow(a, 2) + pow(b, 2) + 2 * a * x1 + pow(x1, 2) +
                            2 * b * x2 + pow(x2, 2) + pow(x3, 2))))) /
-      (4. * (1 - Nu) * il::pi);
+      (4. * (1 - Nu) * arma::datum::pi);
 
   Sigma_yz_Dy =
       (G *
@@ -290,7 +290,7 @@ il::Array2D<double> StressTensorDueToDDyOnSingleEltP0(double &a, double &b,
                   (sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2)) *
                    (b + x2 +
                     sqrt(pow(a + x1, 2) + pow(b + x2, 2) + pow(x3, 2))))))) /
-      (4. * (1 - Nu) * il::pi);
+      (4. * (1 - Nu) * arma::datum::pi);
 
   StressTensorDueToDy(0, 0) = Sigma_xx_Dy;
   StressTensorDueToDy(0, 1) = Sigma_xy_Dy;

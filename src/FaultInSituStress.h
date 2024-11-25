@@ -12,20 +12,20 @@ namespace EQSim {
 
 class FaultInSituStress {
  private:
-  il::Array<double> sxx_;  // sigma_xx
-  il::Array<double> syy_;  // sigma_yy
-  il::Array<double> szz_;
-  il::Array<double> sxy_;
-  il::Array<double> sxz_;
-  il::Array<double> syz_;
+  arma::vec sxx_;  // sigma_xx
+  arma::vec syy_;  // sigma_yy
+  arma::vec szz_;
+  arma::vec sxy_;
+  arma::vec sxz_;
+  arma::vec syz_;
 
  public:
   // Constructors
   FaultInSituStress() = default;
 
-  FaultInSituStress(il::Array<double> &sigmaxx, il::Array<double> &sigma_yy,
-                    il::Array<double> &sigma_zz, il::Array<double> &sigma_xy,
-                    il::Array<double> &sigma_xz, il::Array<double> &sigma_yz) {
+  FaultInSituStress(arma::vec &sigmaxx, arma::vec &sigma_yy,
+                    arma::vec &sigma_zz, arma::vec &sigma_xy,
+                    arma::vec &sigma_xz, arma::vec &sigma_yz) {
     sxx_ = sigmaxx;
     syy_ = sigma_yy;
     szz_ = sigma_zz;
@@ -35,27 +35,27 @@ class FaultInSituStress {
   };
 
   // Getter methods
-  il::Array<double> getSxx() const { return sxx_; };
-  il::Array<double> getSyy() const { return syy_; };
-  il::Array<double> getSzz() const { return szz_; };
-  il::Array<double> getSxy() const { return sxy_; };
-  il::Array<double> getSxz() const { return sxz_; };
-  il::Array<double> getSyz() const { return syz_; };
-  double getSxx(il::int_t &i) const { return sxx_[i]; };
-  double getSyy(il::int_t &i) const { return syy_[i]; };
-  double getSzz(il::int_t &i) const { return szz_[i]; };
-  double getSxy(il::int_t &i) const { return sxy_[i]; };
-  double getSxz(il::int_t &i) const { return sxz_[i]; };
-  double getSyz(il::int_t &i) const { return syz_[i]; };
+  arma::vec getSxx() const { return sxx_; };
+  arma::vec getSyy() const { return syy_; };
+  arma::vec getSzz() const { return szz_; };
+  arma::vec getSxy() const { return sxy_; };
+  arma::vec getSxz() const { return sxz_; };
+  arma::vec getSyz() const { return syz_; };
+  double getSxx(arma::uword &i) const { return sxx_[i]; };
+  double getSyy(arma::uword &i) const { return syy_[i]; };
+  double getSzz(arma::uword &i) const { return szz_[i]; };
+  double getSxy(arma::uword &i) const { return sxy_[i]; };
+  double getSxz(arma::uword &i) const { return sxz_[i]; };
+  double getSyz(arma::uword &i) const { return syz_[i]; };
 
   // Methods
-  il::Array<double> InsituTractionsElt(EQSim::ElementData &my_elt,
-                                       il::int_t &elt_idx) const {
-    il::Array<double> n = my_elt.getN();
-    il::Array<double> s1 = my_elt.getS1();
-    il::Array<double> s2 = my_elt.getS2();
+  arma::vec InsituTractionsElt(EQSim::ElementData &my_elt,
+                                       arma::uword &elt_idx) const {
+    arma::vec n = my_elt.getN();
+    arma::vec s1 = my_elt.getS1();
+    arma::vec s2 = my_elt.getS2();
 
-    il::Array<double> traction{3, 0.};
+    arma::vec traction(3, arma::fill::zeros);
 
     // s1.Sig.n
     traction[0] = (s1[0] * sxx_[elt_idx] * n[0] + s1[0] * sxy_[elt_idx] * n[1] +
@@ -84,21 +84,23 @@ class FaultInSituStress {
     return traction;
   };
 
-  il::Array<double> AllInSituTractions(EQSim::Mesh &my_mesh) const {
-    il::Array<double> inSituTractionsEltE{};
-    il::Array<double> all_tractions{my_mesh.getNumberOfDofs(), 0.};
+  arma::vec AllInSituTractions(EQSim::Mesh &my_mesh) const {
+    arma::vec inSituTractionsEltE;
+    arma::vec all_tractions(my_mesh.getNumberOfDofs(), arma::fill::zeros);
 
     // Number of Dofs per element
-    il::int_t NDofsPerElt = 3;
+    arma::uword NDofsPerElt = 3;
     // Number of total elements
-    il::int_t Nelts = my_mesh.getNumberOfElts();
+    arma::uword Nelts = my_mesh.getNumberOfElts();
 
     // Loop over all the elements
-    for (il::int_t e = 0; e < Nelts; e++) {
+    for (arma::uword e = 0; e < Nelts; e++) {
       // Get data of element e
       EQSim::ElementData my_elt = my_mesh.getElementData(e);
+
       // Get tractions on element e
       inSituTractionsEltE = InsituTractionsElt(my_elt, e);
+
       // Fill the vector
       all_tractions[e * NDofsPerElt] = inSituTractionsEltE[0];
       all_tractions[e * NDofsPerElt + 1] = inSituTractionsEltE[1];

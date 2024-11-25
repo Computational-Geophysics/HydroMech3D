@@ -1,12 +1,12 @@
 ## Set job parameters
 
 ## Job Name
-#PBS -N 3DEQSim
+#PBS -N HMech3DWfly
 
 ## Project Funding Code E,g. eee_userid
 #PBS -P eos_luca.dalzilio
 ## Queue  Name
-#PBS -q q32
+#PBS -q qintel_wfly
 
 ## Send email to yourself. Replace the email to your own email.
 #PBS -m bea
@@ -24,16 +24,15 @@
 #PBS -l select=1:ncpus=32:ompthreads=32
 
 ## Load the Application
-source /home/zhenhuan001/intel/oneapi/setvars.sh
-source /usr/local/intel/2018u3/mkl/bin/mklvars.sh
-#source /usr/local/intel/oneapi/2021.3/setvars.sh
+source /usr/local/intel/2023.1/setvars.sh
+
 ## Capture Number of Cores
 nprocs=`cat $PBS_NODEFILE|wc -l`
 
 ## If you have high I/O, you may want to copy your folder to /scratch/$USER
 ## cd /scratch/$USER or else you can use the following
 
-cd /home/zhenhuan001/3DEQSim/build
+cd /home/zhenhuan001/HydroMech3D
 ## Inputfile
 inputfile=3DEQSim
 

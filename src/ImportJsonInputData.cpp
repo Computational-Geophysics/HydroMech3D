@@ -9,7 +9,7 @@
 
 namespace EQSim {
 
-void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
+void ImportFirstLayerJsonInput(json &js, bool &checkRestart, 
                                std::string &solver_description,
                                std::string &basefilename, std::string &date,
                                std::string &program_name, std::string &res_path,
@@ -22,28 +22,29 @@ void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
       std::cout << date << std::endl;
     } else {
       std::cout << "No date in input file - please add it" << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Program name") == 1) {
       program_name = js["Program name"].get<std::string>();
     } else {
       std::cout << "No program name in input file - please add it" << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Results path") == 1) {
       res_path = js["Results path"].get<std::string>();
+      std::cout << "The results will be saved under the path:" << res_path <<  std::endl;
     } else {
       std::cout << "No results path in input file - please add it" << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Base name") == 1) {
       basefilename = js["Base name"].get<std::string>();
     } else {
       std::cout << "No base name for output file(s)" << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Description") == 1) {
@@ -54,28 +55,28 @@ void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
     } else {
       std::cout << "No solver description in input file - please add it"
                 << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Mesh") == 1) {
       j_mesh = js["Mesh"];
     } else {
       std::cout << "No Mesh in json input file " << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Model parameters") == 1) {
       j_model_params = js["Model parameters"];
     } else {
       std::cout << "No model parameters in json input file " << std::endl;
-      il::abort();
+      std::abort();
     }
 
     if (js.count("Solver parameters") == 1) {
       j_solver_params = js["Solver parameters"];
     } else {
       std::cout << "No solver parameters in json input file " << std::endl;
-      il::abort();
+      std::abort();
     }
 
   } else {
@@ -85,7 +86,7 @@ void ImportFirstLayerJsonInput(json &js, bool &checkRestart, il::io_t,
 }
 
 void ImportSecondLayerJsonInput(json &j_model_params, bool &checkRestart,
-                                il::io_t, json &j_injection,
+                                json &j_injection,
                                 json &j_fluid_params, json &j_fault_properties,
                                 json &j_fault_insitu_params,
                                 json &j_initial_conditions,
@@ -95,51 +96,60 @@ void ImportSecondLayerJsonInput(json &j_model_params, bool &checkRestart,
 
     if ((j_model_params.count("Fluid properties") == 1)) {
       j_fluid_params = j_model_params["Fluid properties"];
+      std::cout << "Fluid properties from json input file loaded "<<std::endl;
     } else {
       std::cout << "No fluid properties in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Fault in-situ conditions") == 1)) {
       j_fault_insitu_params = j_model_params["Fault in-situ conditions"];
+      std::cout << "Fault in-situ conditions from json input file loaded "<<std::endl;
     } else {
       std::cout << "No fault in-situ conditions in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Initial conditions") == 1)) {
       j_initial_conditions = j_model_params["Initial conditions"];
+      std::cout << "Initial conditions from json input file loaded "<<std::endl;
     } else {
       std::cout << "No initial conditions in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Rock properties") == 1)) {
       j_rock_properties = j_model_params["Rock properties"];
+      std::cout << "Rock properties from json input file loaded "<<std::endl;
     } else {
       std::cout << "No rock properties in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Fault properties") == 1)) {
       j_fault_properties = j_model_params["Fault properties"];
+      std::cout << "Fault properties from json input file loaded "<<std::endl;
+
     } else {
       std::cout << "No fault properties in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Injection condition") == 1)) {
       j_injection = j_model_params["Injection condition"];
+      std::cout << "Injection condition from json input file loaded "<<std::endl;
+
     } else {
       std::cout << "No injection condition in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_model_params.count("Fluid flow") == 1)) {
       j_fluid_flow = j_model_params["Fluid flow"];
+      std::cout << "Fluid flow file from json input file loaded "<<std::endl;
     } else {
       std::cout << "No fluid flow in json input file ";
-      il::abort();
+      std::abort();
     }
 
   } else {
@@ -149,7 +159,7 @@ void ImportSecondLayerJsonInput(json &j_model_params, bool &checkRestart,
 }
 
 void ImportThirdLayerJsonInput(bool &checkRestart, json &j_fault_properties,
-                               il::io_t, json &j_friction_properties,
+                               json &j_friction_properties,
                                json &j_permeability_properties) {
   if (!checkRestart) {
     /// New analysis
@@ -158,14 +168,14 @@ void ImportThirdLayerJsonInput(bool &checkRestart, json &j_fault_properties,
       j_friction_properties = j_fault_properties["Friction"];
     } else {
       std::cout << "No friction properties in json input file ";
-      il::abort();
+      std::abort();
     }
 
     if ((j_fault_properties.count("Permeability") == 1)) {
       j_permeability_properties = j_fault_properties["Permeability"];
     } else {
       std::cout << "No permeability properties in json input file ";
-      il::abort();
+      std::abort();
     }
 
   } else {
@@ -183,14 +193,14 @@ EQSim::FluidProperties LoadFluidProperties(json &j_fluid_params) {
     fluid_rheology = j_fluid_params["Rheology"].get<std::string>();
   } else {
     std::cout << "No fluid rheology in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_fluid_params.count("Density") == 1) {
     fluid_density = j_fluid_params["Density"].get<double>();
   } else {
     std::cout << "No fluid density in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_fluid_params.count("Fluid Compressibility") == 1) {
@@ -198,14 +208,14 @@ EQSim::FluidProperties LoadFluidProperties(json &j_fluid_params) {
         j_fluid_params["Fluid Compressibility"].get<double>();
   } else {
     std::cout << "No Fluid Compressibility in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_fluid_params.count("Viscosity") == 1) {
     fluid_viscosity = j_fluid_params["Viscosity"].get<double>();
   } else {
     std::cout << "No fluid viscosity in input data!";
-    il::abort();
+    std::abort();
   }
 
   // Call the constructor
@@ -226,35 +236,35 @@ EQSim::FaultProperties LoadFaultProperties(EQSim::Mesh &Mesh,
     porosity = j_fault_properties["Porosity"].get<double>();
   } else {
     std::cout << "No fault porosity in input data!";
-    il::abort();
+    std::abort();
   }
 
-  il::Array<double> initial_plastic_fault_porosity;
+  arma::vec initial_plastic_fault_porosity;
   if (j_fault_properties.count("Initial plastic porosity") == 1) {
-    il::int_t NumberOFPlasticFaultPorosity =
+    arma::uword NumberOFPlasticFaultPorosity =
         j_fault_properties["Initial plastic porosity"].size();
-    initial_plastic_fault_porosity.Resize(NumberOFPlasticFaultPorosity);
-    for (il::int_t I = 0; I < initial_plastic_fault_porosity.size(); ++I) {
+    initial_plastic_fault_porosity.resize(NumberOFPlasticFaultPorosity);
+    for (arma::uword I = 0; I < initial_plastic_fault_porosity.n_elem; ++I) {
       initial_plastic_fault_porosity[I] =
           j_fault_properties["Initial plastic porosity"][I];
     }
   } else {
     std::cout << "No Initial plastic fault porosity in input data!";
-    il::abort();
+    std::abort();
   }
 
-  il::Array<double> initial_hydraulic_aperture;
+  arma::vec initial_hydraulic_aperture;
   if (j_fault_properties.count("Initial hydraulic aperture") == 1) {
-    il::int_t NumberOFFaultHydraulicApertures =
+    arma::uword NumberOFFaultHydraulicApertures =
         j_fault_properties["Initial hydraulic aperture"].size();
-    initial_hydraulic_aperture.Resize(NumberOFFaultHydraulicApertures);
-    for (il::int_t I = 0; I < initial_hydraulic_aperture.size(); ++I) {
+    initial_hydraulic_aperture.resize(NumberOFFaultHydraulicApertures);
+    for (arma::uword I = 0; I < initial_hydraulic_aperture.n_elem; ++I) {
       initial_hydraulic_aperture[I] =
           j_fault_properties["Initial hydraulic aperture"][I];
     }
   } else {
     std::cout << "No Initial hydraulic aperture in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_fault_properties.count("Void compressibility") == 1) {
@@ -262,7 +272,7 @@ EQSim::FaultProperties LoadFaultProperties(EQSim::Mesh &Mesh,
         j_fault_properties["Void compressibility"].get<double>();
   } else {
     std::cout << "No void compressibility in input data!";
-    il::abort();
+    std::abort();
   }
 
   EQSim::FrictionProperties *fric_coeff_properties =
@@ -274,12 +284,12 @@ EQSim::FaultProperties LoadFaultProperties(EQSim::Mesh &Mesh,
       fric_coeff_properties = new RateAndStateFriction;
     } else {
       std::cout << "Type of friction coefficient is not valid! " << std::endl;
-      il::abort();
+      std::abort();
     }
   } else {
     std::cout << "Type of friction coefficient is not specified in input file! "
               << std::endl;
-    il::abort();
+    std::abort();
   }
 
   // Now we declare a pointer for permeability that point to the type of
@@ -294,12 +304,12 @@ EQSim::FaultProperties LoadFaultProperties(EQSim::Mesh &Mesh,
     }
     else {
       std::cout << "Type of permeability law is not valid! " << std::endl;
-      il::abort();
+      std::abort();
     }
   } else {
     std::cout << "Type of permeability is not specified in input file! "
               << std::endl;
-    il::abort();
+    std::abort();
   }
 
   // Now that the pointer points to the desired law, set the parameters
@@ -311,38 +321,38 @@ EQSim::FaultProperties LoadFaultProperties(EQSim::Mesh &Mesh,
   // variable
   if (j_initial_conditions.count("Initial DDs") != 1) {
     std::cout << "Initial DDs keyword is wrong in input file! " << std::endl;
-    il::abort();
+    std::abort();
   }
 
   if (j_initial_conditions.count("Initial DDs rates") != 1) {
     std::cout << "Initial DDs rates keyword is wrong in input file! "
               << std::endl;
-    il::abort();
+    std::abort();
   }
 
   if (j_initial_conditions.count("Initial state variable") != 1) {
     std::cout << "Initial state variable is wrong in input file! " << std::endl;
-    il::abort();
+    std::abort();
   }
 
   if (j_initial_conditions.count("Internal loads") != 1) {
     std::cout << "Internal loads is wrong in input file! " << std::endl;
-    il::abort();
+    std::abort();
   }
 
-  IL_ASSERT(j_initial_conditions["Initial DDs"].size() ==
-            Mesh.getNumberOfDofs());
-  IL_ASSERT(j_initial_conditions["Initial DDs rates"].size() ==
-            Mesh.getNumberOfDofs());
-  IL_ASSERT(j_initial_conditions["Initial state variable"].size() ==
-            Mesh.getNumberOfElts());
-  IL_ASSERT(j_initial_conditions["Internal loads"].size() ==
-            Mesh.getNumberOfDofs());
-  il::Array<double> initial_DDs{Mesh.getNumberOfDofs(), 0.};
-  il::Array<double> initial_DDs_rates{Mesh.getNumberOfDofs(), 0.};
-  il::Array<double> initial_state_variables{Mesh.getNumberOfElts(), 0.};
-  il::Array<double> internal_loads{Mesh.getNumberOfDofs(), 0.};
-  for (il::int_t I = 0; I < Mesh.getNumberOfElts(); ++I) {
+  assert(j_initial_conditions["Initial DDs"].size() ==
+         Mesh.getNumberOfDofs());
+  assert(j_initial_conditions["Initial DDs rates"].size() ==
+         Mesh.getNumberOfDofs());
+  assert(j_initial_conditions["Initial state variable"].size() ==
+         Mesh.getNumberOfElts());
+  assert(j_initial_conditions["Internal loads"].size() ==
+         Mesh.getNumberOfDofs());
+  arma::vec initial_DDs(Mesh.getNumberOfDofs(), arma::fill::zeros);
+  arma::vec initial_DDs_rates(Mesh.getNumberOfDofs(), arma::fill::zeros);
+  arma::vec initial_state_variables(Mesh.getNumberOfElts(), arma::fill::zeros);
+  arma::vec internal_loads(Mesh.getNumberOfDofs(), arma::fill::zeros);
+  for (arma::uword I = 0; I < Mesh.getNumberOfElts(); ++I) {
     initial_DDs[3 * I] = j_initial_conditions["Initial DDs"][3 * I];
     initial_DDs[3 * I + 1] = j_initial_conditions["Initial DDs"][3 * I + 1];
     initial_DDs[3 * I + 2] = j_initial_conditions["Initial DDs"][3 * I + 2];
@@ -378,21 +388,21 @@ EQSim::SolidMatrixProperties LoadMatrixProperties(json &j_rock_properties) {
     YoungModulus = j_rock_properties["Young's modulus"].get<double>();
   } else {
     std::cout << "No Young's modulus in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_rock_properties.count("Poisson's ratio") == 1) {
     PoissonRatio = j_rock_properties["Poisson's ratio"].get<double>();
   } else {
     std::cout << "No Poisson's ratio in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_rock_properties.count("Density") == 1) {
     RockDensity = j_rock_properties["Density"].get<double>();
   } else {
     std::cout << "No rock density in input data!";
-    il::abort();
+    std::abort();
   }
 
   EQSim::SolidMatrixProperties MatrixProperties(YoungModulus, PoissonRatio,
@@ -410,7 +420,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
         j_solver_params["Initial time"].get<double>();
   } else {
     std::cout << "No Initial time in json input file ";
-    il::abort();
+    std::abort();
   }
 
   if (j_solver_params.count("Time step") == 1) {
@@ -418,7 +428,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
         j_solver_params["Time step"].get<double>();
   } else {
     std::cout << "No Time step in json input file ";
-    il::abort();
+    std::abort();
   }
 
   if (j_solver_params.count("Maximum time") == 1) {
@@ -426,7 +436,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
         j_solver_params["Maximum time"].get<double>();
   } else {
     std::cout << "No Maximum in json input file ";
-    il::abort();
+    std::abort();
   }
 
   if (j_solver_params.count("Time step amplification factor") == 1) {
@@ -434,7 +444,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
         j_solver_params["Time step amplification factor"].get<double>();
   } else {
     std::cout << "No Time step amplification factor in json input file ";
-    il::abort();
+    std::abort();
   }
 
   if (j_solver_params.count("Time step reduction factor") == 1) {
@@ -442,7 +452,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
         j_solver_params["Time step reduction factor"].get<double>();
   } else {
     std::cout << "No Time step reduction factor in json input file ";
-    il::abort();
+    std::abort();
   }
 
   if (j_solver_params.count("Tolerance RK") == 1) {
@@ -461,7 +471,7 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
   } else {
     std::cout
         << "No Export current solution every i time steps in json input file ";
-    il::abort();
+    std::abort();
   }
 
   return solver_parameter_struct;
@@ -471,33 +481,33 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
 EQSim::Mesh LoadMeshData(json &j_mesh) {
   if (j_mesh.count("Node coordinates") != 1) {
     std::cout << "No node coordinates in input data!";
-    il::abort();
+    std::abort();
   }
 
   if (j_mesh.count("Connectivity Nodes") != 1) {
     std::cout << "No connectivity nodes in input data!";
-    il::abort();
+    std::abort();
   }
 
-  il::int_t Nelts = j_mesh["Connectivity Nodes"].size();
-  il::int_t Nnodes = j_mesh["Node coordinates"].size();
+  arma::uword Nelts = j_mesh["Connectivity Nodes"].size();
+  arma::uword Nnodes = j_mesh["Node coordinates"].size();
 
-  IL_EXPECT_FAST(Nelts > 0);
-  IL_EXPECT_FAST(Nnodes > 0);
-  IL_EXPECT_FAST(j_mesh["Node coordinates"][0].size() == 3);
-  IL_EXPECT_FAST(j_mesh["Connectivity Nodes"][0].size() == 4);
+  assert(Nelts > 0);
+  assert(Nnodes > 0);
+  assert(j_mesh["Node coordinates"][0].size() == 3);
+  assert(j_mesh["Connectivity Nodes"][0].size() == 4);
 
-  il::Array2D<double> node_coordinates{Nnodes, 3, 0.};
-  il::Array2D<il::int_t> connettivity{Nelts, 4, 0};
-  il::int_t interpolation_order = 0;
+  arma::mat node_coordinates(Nnodes, 3, arma::fill::zeros);
+  arma::imat connettivity(Nelts, 4, arma::fill::zeros);
+  arma::uword interpolation_order = 0;
 
-  for (il::int_t i = 0; i < Nnodes; i++) {
+  for (arma::uword i = 0; i < Nnodes; i++) {
     node_coordinates(i, 0) = j_mesh["Node coordinates"][i][0];
     node_coordinates(i, 1) = j_mesh["Node coordinates"][i][1];
     node_coordinates(i, 2) = j_mesh["Node coordinates"][i][2];
   }
 
-  for (il::int_t i = 0; i < Nelts; i++) {
+  for (arma::uword i = 0; i < Nelts; i++) {
     connettivity(i, 0) = j_mesh["Connectivity Nodes"][i][0];
     connettivity(i, 1) = j_mesh["Connectivity Nodes"][i][1];
     connettivity(i, 2) = j_mesh["Connectivity Nodes"][i][2];
@@ -505,10 +515,10 @@ EQSim::Mesh LoadMeshData(json &j_mesh) {
   }
 
   if (j_mesh.count("Interpolation order") == 1) {
-    interpolation_order = j_mesh["Interpolation order"].get<il::int_t>();
+    interpolation_order = j_mesh["Interpolation order"].get<int>();
   } else {
     std::cout << "No interpolation order in input data!";
-    il::abort();
+    std::abort();
   }
 
   // Call mesh constructor
@@ -520,43 +530,44 @@ EQSim::Mesh LoadMeshData(json &j_mesh) {
 EQSim::FaultInSituStress LoadFaultInSituStressComponents(json &j_fault_insitu,
                                                          EQSim::Mesh &Mesh) {
   std::string TypeInSitu;
+  std::cout<<"Starting to load Fault Insitu Stress"<<std::endl;
 
   if (j_fault_insitu.count("Type") == 1) {
     TypeInSitu = j_fault_insitu["Type"].get<std::string>();
   } else {
     std::cout << "No type of in situ stress in input data!";
-    il::abort();
+    std::abort();
   }
 
-  il::int_t sxx_present = j_fault_insitu.count("Sxx");
-  il::int_t syy_present = j_fault_insitu.count("Syy");
-  il::int_t szz_present = j_fault_insitu.count("Szz");
-  il::int_t sxy_present = j_fault_insitu.count("Sxy");
-  il::int_t sxz_present = j_fault_insitu.count("Sxz");
-  il::int_t syz_present = j_fault_insitu.count("Syz");
+  arma::uword sxx_present = j_fault_insitu.count("Sxx");
+  arma::uword syy_present = j_fault_insitu.count("Syy");
+  arma::uword szz_present = j_fault_insitu.count("Szz");
+  arma::uword sxy_present = j_fault_insitu.count("Sxy");
+  arma::uword sxz_present = j_fault_insitu.count("Sxz");
+  arma::uword syz_present = j_fault_insitu.count("Syz");
 
   if (sxx_present != 1 || syy_present != 1 || szz_present != 1 ||
       sxy_present != 1 || sxz_present != 1 || syz_present != 1) {
     std::cout << " error in input file - No fault stress values \n";
-    il::abort();
+    std::abort();
   }
 
-  il::int_t nxx = j_fault_insitu["Sxx"].size();
-  il::int_t nyy = j_fault_insitu["Syy"].size();
-  il::int_t nzz = j_fault_insitu["Szz"].size();
-  il::int_t nxy = j_fault_insitu["Sxy"].size();
-  il::int_t nxz = j_fault_insitu["Sxz"].size();
-  il::int_t nyz = j_fault_insitu["Syz"].size();
+  arma::uword nxx = j_fault_insitu["Sxx"].size();
+  arma::uword nyy = j_fault_insitu["Syy"].size();
+  arma::uword nzz = j_fault_insitu["Szz"].size();
+  arma::uword nxy = j_fault_insitu["Sxy"].size();
+  arma::uword nxz = j_fault_insitu["Sxz"].size();
+  arma::uword nyz = j_fault_insitu["Syz"].size();
 
-  il::int_t Nelts = Mesh.getNumberOfElts();
+  arma::uword Nelts = Mesh.getNumberOfElts();
 
-  IL_EXPECT_FAST(Nelts == nxx && Nelts == nyy && Nelts == nzz && Nelts == nxy &&
-                 Nelts == nxz && Nelts == nyz);
+  assert(Nelts == nxx && Nelts == nyy && Nelts == nzz && Nelts == nxy &&
+         Nelts == nxz && Nelts == nyz);
 
-  il::Array<double> Sxx(Nelts, 0.), Syy(Nelts, 0.), Szz(Nelts, 0.),
-      Sxy(Nelts, 0.), Sxz(Nelts, 0.), Syz(Nelts, 0.);
+  arma::vec Sxx(Nelts, arma::fill::zeros), Syy(Nelts, arma::fill::zeros), Szz(Nelts, arma::fill::zeros),
+      Sxy(Nelts, arma::fill::zeros), Sxz(Nelts, arma::fill::zeros), Syz(Nelts, arma::fill::zeros);
 
-  for (il::int_t i = 0; i < Nelts; i++) {
+  for (arma::uword i = 0; i < Nelts; i++) {
     Sxx[i] = j_fault_insitu["Sxx"][i];
     Syy[i] = j_fault_insitu["Syy"][i];
     Szz[i] = j_fault_insitu["Szz"][i];
@@ -566,6 +577,7 @@ EQSim::FaultInSituStress LoadFaultInSituStressComponents(json &j_fault_insitu,
   }
 
   FaultInSituStress FaultInSituStress(Sxx, Syy, Szz, Sxy, Sxz, Syz);
+
   return FaultInSituStress;
 }
 
