@@ -6,3 +6,4 @@
 *.nb
 /il
 *.o
+/test_code
