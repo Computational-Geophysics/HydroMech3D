@@ -7,33 +7,6 @@
 
 namespace EQSim {
 
-arma::mat RotationMatrix3D(arma::vec &normal_vector,
-                                            double &theta) {
-  arma::mat R(3, 3, arma::fill::zeros);
-
-  double n1, n2, n3, n1square, n2square, n3square;
-  n1 = normal_vector[0];
-  n2 = normal_vector[1];
-  n3 = normal_vector[2];
-  n1square = n1 * n1;
-  n2square = n2 * n2;
-  n3square = n3 * n3;
-
-  R(0, 0) = cos(theta) + (n1square * (1 - cos(theta)));
-  R(0, 1) = (n1 * n2 * (1 - cos(theta))) - (n3 * sin(theta));
-  R(0, 2) = (n1 * n3 * (1 - cos(theta))) + (n2 * sin(theta));
-
-  R(1, 0) = (n1 * n2 * (1 - cos(theta))) + n3 * sin(theta);
-  R(1, 1) = cos(theta) + (n2square * (1 - cos(theta)));
-  R(1, 2) = (n2 * n3 * (1 - cos(theta))) - (n1 * sin(theta));
-
-  R(2, 0) = (n1 * n3 * (1 - cos(theta))) - (n2 * sin(theta));
-  R(2, 1) = (n2 * n3 * (1 - cos(theta))) + (n1 * sin(theta));
-  R(2, 2) = cos(theta) + (n3square * (1 - cos(theta)));
-
-  return R;
-}
-
 arma::mat AssembleElastMat(Mesh &mesh, EQSim::SolidMatrixProperties &matrix_prop) {
 
   arma::vec normal_source_elt;
@@ -54,20 +27,24 @@ arma::mat AssembleElastMat(Mesh &mesh, EQSim::SolidMatrixProperties &matrix_prop
 
   arma::mat ElastMat{mesh.getNumberOfDofs(), mesh.getNumberOfDofs(), arma::fill::zeros};
 
+  //#pragma omp parallel for private(elt_s, elt_r, normal_source_elt, theta_source_elt, R, Rt, relative_distance_receiv_source, Xe, normal_receiver_elt, s1_receiver_elt, s2_receiver_elt, se1, se2, ne, TractionsDueToDDsOnSingleElt)
   for (arma::uword e = 0; e < mesh.getNumberOfElts(); ++e) {
-    elt_s = mesh.getElementData(e);
+    elt_s = mesh.getElementData(e); 
     for (arma::uword j = 0; j < mesh.getNumberOfElts(); ++j) {
       elt_r = mesh.getElementData(j);
       normal_source_elt = elt_s.getN();
       theta_source_elt = elt_s.getTheta();
       R = EQSim::RotationMatrix3D(normal_source_elt, theta_source_elt);
-      Rt = R;
-      Rt(0, 1) = R(1, 0);
-      Rt(0, 2) = R(2, 0);
-      Rt(1, 0) = R(0, 1);
-      Rt(1, 2) = R(2, 1);
-      Rt(2, 0) = R(0, 2);
-      Rt(2, 1) = R(1, 2);
+      // std::cout << "Theta: " << theta_source_elt << std::endl;
+      // std::cout << "Rotation Matrix R:\n" << R << std::endl;
+
+      Rt = R.t();
+      //Rt(0, 1) = R(1, 0);
+      //Rt(0, 2) = R(2, 0);
+      //Rt(1, 0) = R(0, 1);
+      //Rt(1, 2) = R(2, 1);
+      //Rt(2, 0) = R(0, 2);
+      //Rt(2, 1) = R(1, 2);
 
       for (arma::uword I = 0; I < relative_distance_receiv_source.n_elem;
            ++I) {
@@ -85,19 +62,27 @@ arma::mat AssembleElastMat(Mesh &mesh, EQSim::SolidMatrixProperties &matrix_prop
       auto a_elt_s = elt_s.getA();
       auto b_elt_s = elt_s.getB();
 
+      /*
+      arma::vec n_src_local{0,0,1};
+      arma::vec s1_src_local{1,0,0};
+      arma::vec s2_src_local{0,1,0};
+      TractionsDueToDDsOnSingleElt =
+          EQSim::TractionsDueToDDsOnSingleEltP0(
+              a_elt_s, b_elt_s, Xe, s1_src_local, s2_src_local, n_src_local, matrix_prop);
+      */
       TractionsDueToDDsOnSingleElt =
           EQSim::TractionsDueToDDsOnSingleEltP0(
               a_elt_s, b_elt_s, Xe, se1, se2, ne, matrix_prop);
-
-      for (arma::uword j2 = 0; j2 < TractionsDueToDDsOnSingleElt.n_rows;
+      for (arma::uword j2 = 0; j2 < TractionsDueToDDsOnSingleElt.n_cols;
            ++j2) {
-        for (arma::uword i2 = 0; i2 < TractionsDueToDDsOnSingleElt.n_cols;
+        for (arma::uword i2 = 0; i2 < TractionsDueToDDsOnSingleElt.n_rows;
              ++i2) {
+          //#pragma omp critical 
           ElastMat(j * 3 + i2, e * 3 + j2) = TractionsDueToDDsOnSingleElt(i2, j2);
+          
         }
       }
-
-    }
+    }  
   }
 
   return ElastMat;

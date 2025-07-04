@@ -5,7 +5,7 @@
 // Inclusion from the project
 #include "Mesh.h"
 
-#include "Utils.cpp"
+#include "Utils.h"
 
 namespace EQSim {
 
@@ -13,6 +13,7 @@ EQSim::ElementData Mesh::getElementData(arma::uword ne) const {
   // Get node coordinates of element ne
   // CoorEltNe -> 4x3 array 2D with columns corresponding to x, y, z of the node
   arma::mat CoorEltNe(4, 3, arma::fill::zeros);
+
   CoorEltNe(0, 0) = coordinates_(nodes_connectivity_(ne, 0), 0);
   CoorEltNe(0, 1) = coordinates_(nodes_connectivity_(ne, 0), 1);
   CoorEltNe(0, 2) = coordinates_(nodes_connectivity_(ne, 0), 2);

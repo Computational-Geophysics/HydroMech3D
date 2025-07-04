@@ -30,7 +30,7 @@ long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
                           double &permeab, double &fluid_compress,
                           double &viscosity, double &hydraulic_aperture,
                           double &void_compress, double &porosity, double &d2_p,
-                          double &Q);
+                          double &Q, double &loading_rate);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,20 +94,25 @@ void EQsolver(json &js, bool &checkRestart) {
   EQSim::SolverParameters solver_parameters =
       LoadSolverParameters(j_solver_params);
   std::cout<<"Solver parameters loaded"<<std::endl;
-
-  arma::mat ElastMatrix = EQSim::AssembleElastMat(Mesh, SolidMatrixProperties);
+  
+  arma::wall_clock timer;
+  timer.tic();
+  // arma::mat ElastMatrix = EQSim::AssembleElastMat(Mesh, SolidMatrixProperties);
+  arma::mat ElastMatrix{Mesh.getNumberOfDofs(), Mesh.getNumberOfDofs(), arma::fill::zeros};
   std::cout<<"Elastic matrix assembled"<<std::endl;
+  double TAssemb = timer.toc();
+  std::cout << "Time used to assemble elatic matrices in seconds: " << TAssemb << std::endl;
 
   arma::mat centroids = Mesh.getCentroids();
   arma::imat neigh_elts =
       Mesh.getNeighbourElements_UniformMesh(Mesh);
-  
+      // Mesh.getNeighbourElements_NonUniformMesh();
   std::cout<<"Initializing started"<<std::endl;
 
   // Initialization
   double current_time = solver_parameters.initial_time;
   double time_Step = solver_parameters.time_Step;
-
+  double loading_rate = solver_parameters.loading_rate;
   arma::vec initial_DDs = FaultProperties.getInitialDDs();
   arma::vec initial_DDs_rates = FaultProperties.getInitialDDsRates();
   arma::vec initial_state_variables =
@@ -158,8 +163,8 @@ double pressure_rhs(double &permeab, double &fluid_compress,
 
 double state_rhs(double &theta, double &dc, double &slip_rate) {
   double omega = (std::abs(slip_rate) * theta) / dc;
-
-  return -1. * omega * log(omega);
+  //return -1. * omega * log(omega); // Slip law
+  return 1 - omega; // Aging law
 }
 
 long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
@@ -169,11 +174,15 @@ long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
                           double &permeab, double &fluid_compress,
                           double &viscosity, double &hydraulic_aperture,
                           double &void_compress, double &porosity, double &d2_p,
-                          double &Q) {
-
+                          double &Q, double &loading_rate) {
+  // slip_rate = std::max(slip_rate, 1e-12);
+  double shear_modulus = 3.0e10;    
+  double c_s = 3000;                
+  double eta = shear_modulus / ((1-0.25) * c_s); 
   double beta = porosity * (fluid_compress + void_compress);
   double omega = (std::abs(slip_rate) * theta) / dc;
-  double thetadot = -1. * omega * log(omega);
+  // double thetadot = -1. * omega * log(omega);
+  double thetadot = 1 - omega;
   double pdot = ((permeab / (viscosity * beta)) * d2_p) +
                 (Q / (hydraulic_aperture * beta));
 
@@ -182,12 +191,33 @@ long double slip_rate_rhs(double &ref_slip_velocity, double &a_value,
       (b_value * log((theta * ref_slip_velocity) / dc));
 
   long double Numerator =
-      std::abs(slip_rate) * ((theta * (fric_coeff * pdot - GtimesSlipRate)) +
+      std::abs(slip_rate) * ((theta * (fric_coeff * pdot - GtimesSlipRate - eta*slip_rate)) +
                             (b_value * (p - sigma_n) * thetadot));
 
   long double Denominator = ((a_value * sigma_n) - (a_value * p)) * theta;
-  
-  return Numerator / Denominator;
+
+  // std::cout<<"The value of Numerator is: "<<Numerator<<"The value of the Denominator is: "<<Denominator<<std::endl;
+  // std::cout << "The value of GtimesSlipRate: "<<GtimesSlipRate<<"The value of the radiation damping is: "<<eta*slip_rate<<std::endl;
+  if (std::isnan(Numerator)) {
+    std::cerr << "Error: Numerator is NaN." << std::endl;
+    std::cerr << "slip_rate = " << slip_rate << std::endl;
+    std::cerr << "theta = " << theta << std::endl;
+    std::cerr << "fric_coeff = " << fric_coeff << std::endl;
+    std::cerr << "pdot = " << pdot << std::endl;
+    std::cerr << "GtimesSlipRate = " << GtimesSlipRate << std::endl;
+    std::cerr << "p = " << p << ", sigma_n = " << sigma_n << std::endl;
+    std::cerr << "thetadot = " << thetadot << std::endl;
+    assert(!std::isnan(Numerator));
+}
+  if (std::isnan(Denominator)) {
+    std::cerr << "Error: Denominator is NaN." << std::endl;
+    std::cerr << "a_value = " << a_value << ", sigma_n = " << sigma_n
+              << ", p = " << p << ", theta = " << theta << std::endl;
+    assert(!std::isnan(Denominator));
+}
+  long double dSlipRate_dt = Numerator / Denominator;
+  // dSlipRate_dt += loading_rate;
+  return dSlipRate_dt;
 }
 
 }  // namespace EQSim

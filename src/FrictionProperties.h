@@ -88,6 +88,8 @@ class RateAndStateFriction : public FrictionProperties {
   void setFrictionParameters(json &j_friction_param,
                              EQSim::Mesh &Mesh) override {
     // Initial check of keywords
+    arma::uword Nelts = Mesh.getNumberOfElts();
+
     if (j_friction_param.count("Reference friction coefficient") != 1) {
       std::cout
           << "Reference friction coefficient keyword is wrong in input file! "
@@ -96,6 +98,7 @@ class RateAndStateFriction : public FrictionProperties {
     }
 
     if (j_friction_param.count("a-values") != 1) {
+      std::cout << j_friction_param.count("a-values") <<std::endl;
       std::cout << "a-values keyword is wrong in input file! " << std::endl;
       std::abort();
     }
@@ -117,12 +120,11 @@ class RateAndStateFriction : public FrictionProperties {
       std::abort();
     }
 
-    arma::vec a(1, arma::fill::zeros);
-    arma::vec b(1, arma::fill::zeros);
+    arma::vec a(Nelts, arma::fill::zeros);
+    arma::vec b(Nelts, arma::fill::zeros);
     arma::vec Dc(1, arma::fill::zeros);
     arma::vec Vo(1, arma::fill::zeros);
     arma::vec fo(1, arma::fill::zeros);
-
     assert(fo.size() ==
            j_friction_param["Reference friction coefficient"].size());
     assert(a.size() == j_friction_param["a-values"].size());
@@ -133,12 +135,15 @@ class RateAndStateFriction : public FrictionProperties {
 
     for (arma::uword i = 0; i < 1; ++i) {
       fo[i] = j_friction_param["Reference friction coefficient"][i];
-      a[i] = j_friction_param["a-values"][i];
-      b[i] = j_friction_param["b-values"][i];
       Dc[i] = j_friction_param["State evolution distances"][i];
       Vo[i] = j_friction_param["Reference velocities"][i];
     }
-
+    
+    
+    for (arma::uword i = 0; i < Nelts; ++i) {
+    a[i] = j_friction_param["a-values"][i];
+    b[i] = j_friction_param["b-values"][i];
+    }
     fo_ = fo;
     a_ = a;
     b_ = b;
@@ -147,7 +152,6 @@ class RateAndStateFriction : public FrictionProperties {
 
     // Assign all the material parameters to each element in the mesh
 
-    arma::uword Nelts = Mesh.getNumberOfElts();
     arma::vec foValues(Nelts, arma::fill::zeros);
     arma::vec aValues(Nelts, arma::fill::zeros);
     arma::vec bValues(Nelts, arma::fill::zeros);
@@ -156,8 +160,8 @@ class RateAndStateFriction : public FrictionProperties {
 
     for (arma::uword I = 0; I < Nelts; ++I) {
       foValues[I] = fo_[0];
-      aValues[I] = a_[0];
-      bValues[I] = b_[0];
+      aValues[I] = a_[I];
+      bValues[I] = b_[I];
       reference_velocities[I] = Vo_[0];
       state_evolution_distances[I] = Dc_[0];
     }

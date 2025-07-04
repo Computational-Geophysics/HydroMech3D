@@ -56,7 +56,7 @@ class ElementData {
              (DiffCoorElt(0, 0) * DiffCoorElt(1, 2));
     aux[2] = (-1. * DiffCoorElt(0, 1) * DiffCoorElt(1, 0)) +
              DiffCoorElt(0, 0) * DiffCoorElt(1, 1);
-    normaux = arma::norm(aux, 1);
+    normaux = arma::norm(aux, 2);
 
     n_ = aux / normaux;
 
@@ -69,7 +69,7 @@ class ElementData {
     aux1[2] = (-1. * (-1. * n_[1]) * DiffCoorElt(0, 0)) +
               (-1. * n_[0]) * DiffCoorElt(0, 1);
 
-    normaux1 = arma::norm(aux1, 1);
+    normaux1 = arma::norm(aux1, 2);
 
     s1_ = aux1 / normaux1;
 
@@ -81,7 +81,7 @@ class ElementData {
         (-1. * n_[2]) * DiffCoorElt(1, 0) - ((-1. * n_[0]) * DiffCoorElt(1, 2));
     aux2[2] = (-1. * (-1. * n_[1]) * DiffCoorElt(1, 0)) +
               (-1. * n_[0]) * DiffCoorElt(1, 1);
-    normaux2 = arma::norm(aux2, 1);
+    normaux2 = arma::norm(aux2, 2);
 
     s2_ = aux2 / normaux2;
 

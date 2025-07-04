@@ -28,7 +28,7 @@ class RightHandSideODEs {
                            double &permeab, double &fluid_compress,
                            double &viscosity, double &hydraulic_aperture,
                            double &void_compress, double &porosity,
-                           double &d2_p, double &Q);
+                           double &d2_p, double &Q, double &loading_rate);
 
  public:
   RightHandSideODEs(
@@ -38,7 +38,7 @@ class RightHandSideODEs {
       long double (*rhsFunc3)(double &, double &, double &, double &, double &,
                               double &, double &, double &, double &, double &,
                               double &, double &, double &, double &, double &,
-                              double &, double &, double &)) {
+                              double &, double &, double &, double &)) {
     RhsFunc1_ = rhsFunc1;
     RhsFunc2_ = rhsFunc2;
     RhsFunc3_ = rhsFunc3;

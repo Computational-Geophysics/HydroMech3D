@@ -8,7 +8,7 @@
 #include "StressKernelsP0/StressKernelsDxP0.h"
 #include "StressKernelsP0/StressKernelsDyP0.h"
 #include "StressKernelsP0/StressKernelsDzP0.h"
-#include "Utils.cpp"
+#include "Utils.h"
 
 namespace EQSim {
 
@@ -55,7 +55,7 @@ arma::mat TractionsDueToDDsOnSingleEltP0(
 
     ts2Dx += shear2_vector[I] * TractionVectorDx[I];
     ts2Dy += shear2_vector[I] * TractionVectorDy[I];
-    ts2Dy += shear2_vector[I] * TractionVectorDz[I];
+    ts2Dz += shear2_vector[I] * TractionVectorDz[I];
 
     tnDx += normal_vector[I] * TractionVectorDx[I];
     tnDy += normal_vector[I] * TractionVectorDy[I];

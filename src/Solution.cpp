@@ -188,12 +188,87 @@ void SolutionRK45::exportToUBJson(json &j_obj_to_export,
                                   std::string &filename) {
   // Move to ubjson object
   std::vector<std::uint8_t> j_ubjson_obj = json::to_ubjson(j_obj_to_export);
-  // write prettified binary file
+  // write pdrettified binary file
   std::ofstream output;
   output.open(filename + std::string{".ubj"}, std::ios::out | std::ios::binary);
   output.write((char *)&j_ubjson_obj[0],
                j_ubjson_obj.size() * sizeof(j_ubjson_obj[0]));
   output.close();
 };
+
+
+
+void SolutionRK45::initializeNetCDF(const std::string &filename) {
+    try {
+        // Create a new NetCDF file
+        dataFile = std::make_unique<netCDF::NcFile>(filename + ".nc", netCDF::NcFile::replace);
+        // Define dimensions
+        timeDim = dataFile->addDim("time");
+        eltDim = dataFile->addDim("eltDim", mesh_.getNumberOfElts());
+        // Check if dimensions are valid
+        if (timeDim.isNull() || eltDim.isNull()) {
+            throw netCDF::exceptions::NcException("Dimension creation failed", __FILE__, __LINE__);
+        }
+
+        // Define variables
+        timeVar = dataFile->addVar("time", netCDF::ncDouble, timeDim);
+        cumulIncrmOpeningVar = dataFile->addVar("cumulIncrementOfOpening", netCDF::ncDouble, {timeDim, eltDim});
+        openingVar = dataFile->addVar("opening", netCDF::ncDouble, {timeDim, eltDim});
+        plasticFaultPorosityVar = dataFile->addVar("plasticFaultPorosity", netCDF::ncDouble, {timeDim, eltDim});
+        pressureVar = dataFile->addVar("pressure", netCDF::ncDouble, {timeDim, eltDim});
+        sigmaNVar = dataFile->addVar("sigmaN", netCDF::ncDouble, {timeDim, eltDim});
+        slip1Var = dataFile->addVar("slip1", netCDF::ncDouble, {timeDim, eltDim});
+        slip2Var = dataFile->addVar("slip2", netCDF::ncDouble, {timeDim, eltDim});
+        slipRate1Var = dataFile->addVar("slipRate1", netCDF::ncDouble, {timeDim, eltDim});
+        slipRate2Var = dataFile->addVar("slipRate2", netCDF::ncDouble, {timeDim, eltDim});
+        stateVariableVar = dataFile->addVar("stateVariable", netCDF::ncDouble, {timeDim, eltDim});
+        tau1Var = dataFile->addVar("tau1", netCDF::ncDouble, {timeDim, eltDim});
+        tau2Var = dataFile->addVar("tau2", netCDF::ncDouble, {timeDim, eltDim});
+
+        // Check if variables are valid
+        if (timeVar.isNull() || cumulIncrmOpeningVar.isNull() || openingVar.isNull() || plasticFaultPorosityVar.isNull() ||
+            pressureVar.isNull() || sigmaNVar.isNull() || slip1Var.isNull() || slip2Var.isNull() || slipRate1Var.isNull() ||
+            slipRate2Var.isNull() || stateVariableVar.isNull() || tau1Var.isNull() || tau2Var.isNull()) {
+            throw netCDF::exceptions::NcException("Variable creation failed", __FILE__, __LINE__);
+        }
+
+        // Debugging output
+        std::cout << "NetCDF file created successfully under: "<< filename << std::endl;
+        std::cout << "Dimensions and variables created successfully." << std::endl;
+
+    } catch (netCDF::exceptions::NcException& e) {
+        std::cerr << "NetCDF error: " << e.what() << std::endl;
+    }
+}
+
+
+void SolutionRK45::exportBaseSolutionToNetCDF(double current_time) {
+    try {
+        size_t t = timeDim.getSize();
+        std::vector<size_t> start { t, 0 };      // record t, element 0
+        std::vector<size_t> count { 1, mesh_.getNumberOfElts() };      // 1 time‐step × N elements
+        // Write data to variables for the current time step
+        timeVar.putVar({t}, &current_time);
+        cumulIncrmOpeningVar .putVar(start, count, DDs_.memptr() + 2);
+        openingVar           .putVar(start, count, fault_hydraulic_aperture_.memptr());
+        plasticFaultPorosityVar .putVar(start, count, plastic_fault_porosity_.memptr());
+        pressureVar          .putVar(start, count, pressure_.memptr());
+        sigmaNVar            .putVar(start, count, total_tractions_.memptr() + 2);
+        slip1Var             .putVar(start, count, DDs_.memptr());
+        slip2Var             .putVar(start, count, DDs_.memptr() + 1);
+        slipRate1Var         .putVar(start, count, DDs_rates_.memptr());
+        slipRate2Var         .putVar(start, count, DDs_rates_.memptr() + 1);
+        stateVariableVar     .putVar(start, count, state_variables_.memptr());
+        tau1Var              .putVar(start, count, total_tractions_.memptr());
+        tau2Var              .putVar(start, count, total_tractions_.memptr() + 1);
+    } catch (netCDF::exceptions::NcException& e) {
+        std::cerr << "NetCDF error: " << e.what() << std::endl;
+    }
+}
+void SolutionRK45::closeNetCDF(){
+    dataFile->close();
+    dataFile.reset();
+    std::cout<<"All output saved to netcdf file, file closed"<<std::endl;
+}
 
 }  // namespace EQSim

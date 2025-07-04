@@ -5,6 +5,7 @@
 // Import from IL library
 #include <armadillo>
 #include <JSON/nlohmann/json.hpp>
+#include <netcdf>
 
 #include "FaultInSituStress.h"
 #include "FaultProperties.h"
@@ -175,6 +176,7 @@ class Solution {
                                      arma::uword &slip_direction) {
     DDs_rates_[3 * i + slip_direction] = slip_rate;
   }
+
   void setTotalTractions(arma::vec &tot_tractions) {
     total_tractions_ = tot_tractions;
   }
@@ -210,9 +212,14 @@ class SolutionRK45 : public Solution {
   std::string results_path_, baseFileName_;
   arma::mat ElastMatrix_;
   arma::imat neigh_elts_;
-
+  std::unique_ptr<netCDF::NcFile> dataFile;
+  netCDF::NcDim timeDim, eltDim;
+  netCDF::NcVar timeVar, cumulIncrmOpeningVar, openingVar, plasticFaultPorosityVar, pressureVar, sigmaNVar, slip1Var, slip2Var, slipRate1Var, slipRate2Var, stateVariableVar, tau1Var, tau2Var;
  public:
   SolutionRK45() = default;
+  SolutionRK45(SolutionRK45&&) = default; // Enable move constructor
+  SolutionRK45& operator=(SolutionRK45&&) = default; // Enable move assignment operator
+
   SolutionRK45(double &current_time, double &time_step,
                EQSim::SolverParameters &solver_parameters,
                EQSim::FluidProperties &fluid_prop,
@@ -258,7 +265,9 @@ class SolutionRK45 : public Solution {
   json createJsonObjectToExport(bool &export_background_stresses);
   void exportToJson(json &j_obj_to_export, std::string &filename);
   void exportToUBJson(json &j_obj_to_export, std::string &filename);
-
+  void initializeNetCDF(const std::string &filename);
+  void exportBaseSolutionToNetCDF(double current_time);
+  void closeNetCDF();
   // Getter methods
   Injection getInjectionObj() { return injection_; };
   FluidProperties getFluidProperties() { return fluid_properties_; };

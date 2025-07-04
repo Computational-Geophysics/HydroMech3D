@@ -17,7 +17,7 @@ class RK45 {
  public:
   RK45(RightHandSideODEs* rhsODEs, SolutionRK45 &SolutionRK45){
     rhsODEs_ = rhsODEs;
-    Solution_ = SolutionRK45;
+    Solution_ = std::move(SolutionRK45);
   }
 
   void Solve();

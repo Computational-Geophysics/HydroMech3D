@@ -50,7 +50,7 @@ void ImportFirstLayerJsonInput(json &js, bool &checkRestart,
     if (js.count("Description") == 1) {
       solver_description = js["Description"].get<std::string>();
       std::cout << "-------------------------------------" << std::endl;
-      std::cout << "3DEQSim: a " << solver_description << std::endl;
+      std::cout << "HydroMech3D: a " << solver_description << std::endl;
       std::cout << "-------------------------------------" << std::endl;
     } else {
       std::cout << "No solver description in input file - please add it"
@@ -472,6 +472,35 @@ EQSim::SolverParameters LoadSolverParameters(json &j_solver_params) {
     std::cout
         << "No Export current solution every i time steps in json input file ";
     std::abort();
+  }
+  if (j_solver_params.count("Export stress every i time steps") == 1) {
+    solver_parameter_struct.export_stress_every_i_time_steps_ =
+        j_solver_params["Export stress every i time steps"].get<int>();
+  } else {
+    std::cout
+        << "No Export stress every i time steps in json input file ";
+    std::abort();
+  }
+
+  if (j_solver_params.count("Loading rate") == 1) {
+    solver_parameter_struct.loading_rate =
+        j_solver_params["Loading rate"].get<double>();
+  } else {
+    std::cout << "No loading rate in json input file ";
+    std::abort();
+  }
+  if (j_solver_params.count("Adaptive time step constant") == 1) {
+    solver_parameter_struct.adaptive_dt_constant =
+        j_solver_params["Adaptive time step constant"].get<double>();
+  } else {
+    solver_parameter_struct.adaptive_dt_constant = 1.0;
+  }
+  if (j_solver_params.count("Pressure boundary condition") == 1) {
+    solver_parameter_struct.pressure_boundary_condition =
+        j_solver_params["Pressure boundary condition"].get<std::string>();
+  } else {
+    // Default value is Dirichlet if the entry is missing
+    solver_parameter_struct.pressure_boundary_condition = "Dirichlet";
   }
 
   return solver_parameter_struct;
